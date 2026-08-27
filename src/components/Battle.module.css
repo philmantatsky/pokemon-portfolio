@@ -1,0 +1,1163 @@
+.screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #d8d4e4;
+  overflow: hidden;
+}
+
+/* ── Scene (DS top screen) ── */
+.scene {
+  position: relative;
+  flex: 0 0 60%;
+  overflow: hidden;
+}
+
+/*
+ * Authentic Gen IV "Field (Day)" battle background (Platinum battle
+ * backgrounds sheet): streaky teal sky + green field in one image,
+ * stretched over the whole scene.
+ */
+.sky {
+  position: absolute;
+  inset: 0;
+  background-image: url('../assets/bg-field-day.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+/* unused: the field background image covers the ground too */
+.ground {
+  display: none;
+}
+
+/*
+ * Authentic HGSS grass battle bases (ripped sprite sheet, transparent PNGs in
+ * src/assets): full ellipse for the enemy, wide bottom arc for the player.
+ * Stretched non-uniformly like the DS renderer squashes them in perspective.
+ */
+.platform {
+  position: absolute;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.22));
+}
+
+/*
+ * Platform + sprite geometry: sprites are centered over their platform's
+ * midpoint with calc(center% - half sprite width). PokeAPI sprites carry
+ * transparent padding, so the vertical values are eyeballed from screenshots.
+ */
+.enemyPlatform {
+  background-image: url('../assets/base-enemy-grass.png');
+  width: 34%;
+  height: 19%;
+  right: 5%;
+  top: 37%;
+}
+
+.playerPlatform {
+  background-image: url('../assets/base-player-grass.png');
+  width: 46%;
+  height: 17%;
+  left: 2.5%; /* aligned with the dialog's left edge so no sliver pokes out */
+  bottom: 14%; /* flat-cropped bottom hides behind the dialog box */
+}
+
+/* ── Pokemon sprites ── */
+/*
+ * Sprites are anchored by their FEET line (platform center, a touch below),
+ * then pushed down by the transparent padding measured from each PNG's
+ * alpha channel: Pikachu 27.1% of its height, back sprites via --backPad.
+ */
+.enemySprite {
+  position: absolute;
+  right: calc(22.5% - clamp(75px, 9vw, 110px));
+  bottom: calc(51% - 0.175 * clamp(150px, 18vw, 220px));
+  width: clamp(150px, 18vw, 220px);
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  z-index: 2;
+}
+
+/* player Pokemon slightly bigger than the enemy (closer in perspective) */
+.playerSprite {
+  position: absolute;
+  left: calc(25.5% - clamp(80px, 9.5vw, 120px));
+  /* feet line sits below the dialog top (~26%) so the dialog crops the feet */
+  bottom: calc(21% - var(--backPad, 0.18) * clamp(160px, 19vw, 240px));
+  width: clamp(160px, 19vw, 240px);
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  z-index: 2;
+}
+
+/* contact shadows centered on the feet lines */
+.enemyShadow {
+  position: absolute;
+  right: calc(22.5% - clamp(57px, 7vw, 87px));
+  bottom: 49.3%;
+  width: clamp(115px, 14vw, 175px);
+  height: 3.5%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(45, 80, 38, 0.40) 0%, rgba(45, 80, 38, 0) 70%);
+  z-index: 1;
+}
+
+.playerShadow {
+  position: absolute;
+  left: calc(25.5% - clamp(85px, 10.5vw, 130px));
+  bottom: 19%;
+  width: clamp(170px, 21vw, 260px);
+  height: 4%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(45, 80, 38, 0.40) 0%, rgba(45, 80, 38, 0) 70%);
+  z-index: 1;
+}
+
+/* ── Pokéball spawn animations ── */
+.spawnHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Enemy ball: starts upper-right (where off-screen trainer is), arcs down-left to platform */
+.enemyBall {
+  position: absolute;
+  right: calc(22.5% - 10px);
+  top: 46%;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #e84040 0%, #e84040 44%, #1a1a1a 44%, #1a1a1a 56%, #f8f8f8 56%);
+  border: 2px solid #1a1a1a;
+  z-index: 10;
+  pointer-events: none;
+  animation: enemyBallThrow 900ms linear forwards;
+}
+
+@keyframes enemyBallThrow {
+  0%   { transform: translate(130px, -160px) rotate(0deg); opacity: 0; }
+  8%   { opacity: 1; }
+  32%  { transform: translate(55px, -210px) rotate(-140deg); }
+  65%  { transform: translate(4px, -12px) rotate(-320deg); }
+  80%  { transform: translate(0, 13px) rotate(-345deg); }
+  91%  { transform: translate(0, -6px) rotate(-355deg); }
+  100% { transform: translate(0, 0) rotate(-360deg) scale(0); opacity: 0; }
+}
+
+/* Player ball: starts lower-left (trainer position), arcs up to player platform */
+.playerBall {
+  position: absolute;
+  left: calc(25.5% - 11px);
+  bottom: 22%;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #e84040 0%, #e84040 44%, #1a1a1a 44%, #1a1a1a 56%, #f8f8f8 56%);
+  border: 2px solid #1a1a1a;
+  z-index: 10;
+  pointer-events: none;
+  animation: playerBallThrow 900ms linear forwards;
+}
+
+@keyframes playerBallThrow {
+  0%   { transform: translate(-90px, 130px) rotate(0deg); opacity: 0; }
+  8%   { opacity: 1; }
+  36%  { transform: translate(-22px, -90px) rotate(145deg); }
+  70%  { transform: translate(0, 12px) rotate(305deg); }
+  83%  { transform: translate(0, -8px) rotate(342deg); }
+  92%  { transform: translate(0, 4px) rotate(355deg); }
+  100% { transform: translate(0, 0) rotate(360deg) scale(0); opacity: 0; }
+}
+
+/* Sprite materializes: white silhouette → full color (authentic HGSS style) */
+.materializing {
+  animation: spriteMaterialize 580ms ease-out forwards;
+}
+
+@keyframes spriteMaterialize {
+  0%   { filter: brightness(100) saturate(0); transform: scale(1.08); }
+  25%  { filter: brightness(6) saturate(0.1); transform: scale(1.04); }
+  60%  { filter: brightness(1.8) saturate(0.6); transform: scale(1.01); }
+  100% { filter: brightness(1) saturate(1); transform: scale(1); }
+}
+
+/* ── Trainer intro (classic Red front + HGSS Ethan back) ── */
+/* Red is an 80×80 sheet like the Pokemon fronts — same scale/anchoring as the
+ * enemy sprite; 3px of transparent padding below his feet (alpha-measured). */
+.trainerEnemy {
+  position: absolute;
+  right: calc(22.5% - clamp(75px, 9vw, 110px));
+  bottom: calc(51% - 0.0375 * clamp(150px, 18vw, 220px));
+  width: clamp(150px, 18vw, 220px);
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  z-index: 2;
+  animation: trainerInRight 550ms ease-out backwards;
+}
+
+/* Ethan's back is a tight 54px-wide waist-up crop (HGSS backs have no legs);
+ * sized to the player Pokemon's pixel scale (80px canvas → 19vw ⇒ 54px → 12.8vw)
+ * and sunk low so the dialog box crops his waist like the Pokemon feet. */
+.trainerPlayer {
+  position: absolute;
+  left: calc(25.5% - clamp(54px, 6.4vw, 81px));
+  bottom: 10%;
+  width: clamp(108px, 12.8vw, 162px);
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  z-index: 2;
+  animation: trainerInLeft 550ms ease-out backwards;
+}
+
+@keyframes trainerInRight {
+  from { transform: translateX(70vw); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes trainerInLeft {
+  from { transform: translateX(-70vw); }
+  to   { transform: translateX(0); }
+}
+
+/* exit rules come after the base classes so their animation wins */
+.trainerExitR { animation: trainerOutRight 550ms ease-in forwards; }
+.trainerExitL { animation: trainerOutLeft 550ms ease-in forwards; }
+
+@keyframes trainerOutRight {
+  to { transform: translateX(70vw); }
+}
+
+@keyframes trainerOutLeft {
+  to { transform: translateX(-70vw); }
+}
+
+/* ── Player attack lunge (toward enemy: right + slightly up) ── */
+.lunging {
+  animation: playerLunge 480ms ease-in-out forwards;
+}
+
+@keyframes playerLunge {
+  0%   { transform: translateX(0); }
+  35%  { transform: translateX(28px); }
+  55%  { transform: translateX(28px); }
+  100% { transform: translateX(0); }
+}
+
+/* ── Enemy hit: white flash first, then asymmetric flicker + shake ── */
+.hit {
+  animation: hitFlash 0.65s linear, hitShake 0.65s linear;
+}
+
+@keyframes hitFlash {
+  0%   { filter: brightness(10); }
+  12%  { filter: brightness(1); opacity: 1; }
+  26%  { opacity: 0.3; }
+  40%  { opacity: 1; }
+  54%  { opacity: 0.3; }
+  68%  { opacity: 1; }
+  82%  { opacity: 0.3; }
+  100% { filter: brightness(1); opacity: 1; }
+}
+
+@keyframes hitShake {
+  0%   { transform: translateX(0); }
+  10%  { transform: translateX(-12px); }
+  22%  { transform: translateX(9px); }
+  34%  { transform: translateX(-7px); }
+  46%  { transform: translateX(4px); }
+  58%  { transform: translateX(-2px); }
+  70%  { transform: translateX(0); }
+  100% { transform: translateX(0); }
+}
+
+/* faint drop + fade */
+.fainted {
+  transform: translateY(60px);
+  opacity: 0;
+  transition: transform 1.1s ease-in, opacity 1.1s ease-in;
+}
+
+/* ── Type-specific attack effects (hand-built, matched to Gen IV frames) ──
+   Anchors in scene space: player mouth ≈ (28%, 40%), enemy body ≈ (72%, 55%),
+   enemy feet line = bottom 51%, enemy center x = left 77.5%. z-index 3 keeps
+   effects above the sprites (z2) but below the HP boxes/dialog. */
+.fxLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* ─ Ember: small ember fireballs arc to the target, then the authentic
+     8-frame Game Freak burn loop (fx-fire.png strip) engulfs it ─ */
+.emberBall {
+  position: absolute;
+  left: 28%;
+  bottom: 40%;
+  width: clamp(24px, 3vw, 38px);
+  aspect-ratio: 1;
+  background: url('../assets/fx-ember.png') center / contain no-repeat;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 6px rgba(255, 150, 60, 0.9));
+  opacity: 0;
+  animation: emberArc 400ms ease-in both;
+  animation-delay: calc(var(--i) * 130ms);
+}
+
+@keyframes emberArc {
+  0%   { opacity: 0; left: 28%; bottom: 40%; transform: scale(0.7); }
+  12%  { opacity: 1; }
+  60%  { bottom: 50%; }
+  92%  { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 0; left: 70%; bottom: 54%; transform: scale(1.1); }
+}
+
+/* the REAL Gen IV Ember flame, extracted frame-by-frame from the DPPt
+   battle recording (fx-fire.png: 12-frame vertical strip, 40x80 each) —
+   grows, flickers and reddens over the enemy exactly like on the DS */
+.fireBurn {
+  position: absolute;
+  /* centered on Pikachu's visible body (sprite leans left of its 77.5%
+     anchor), bottom low enough to sit on the platform */
+  left: calc(75.5% - clamp(50px, 6.25vw, 78px));
+  bottom: 44%;
+  width: clamp(100px, 12.5vw, 156px);
+  height: calc(clamp(100px, 12.5vw, 156px) * 2);
+  background: url('../assets/fx-fire.png') 0 0 / 100% 1200% no-repeat;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 14px rgba(255, 150, 55, 0.75));
+  transform-origin: 50% 100%;
+  animation:
+    strip12 1050ms steps(12, jump-none) 420ms forwards,
+    fireFade 1300ms linear 420ms both;
+}
+
+@keyframes strip12 {
+  from { background-position-y: 0%; }
+  to   { background-position-y: 100%; }
+}
+
+@keyframes fireFade {
+  0%   { opacity: 0; }
+  6%   { opacity: 1; }
+  84%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* smoke puffs rising as the flame dies, like the recording's last frames */
+.smokePuff {
+  position: absolute;
+  left: calc(77.5% - 13px);
+  bottom: 58%;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200, 200, 205, 0.9) 0%, rgba(170, 170, 180, 0.5) 60%, transparent 100%);
+  opacity: 0;
+  animation: smokeRise 650ms ease-out forwards;
+}
+
+.smoke1 { animation-delay: 1300ms; margin-left: -20px; }
+.smoke2 { animation-delay: 1440ms; margin-left: 16px; width: 20px; height: 20px; }
+.smoke3 { animation-delay: 1560ms; margin-left: -3px; width: 17px; height: 17px; }
+
+@keyframes smokeRise {
+  0%   { opacity: 0; transform: translateY(0) scale(0.6); }
+  25%  { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(-46px) scale(1.4); }
+}
+
+/* ─ Water Gun, HGSS style: soft white misty stream from the player's mouth
+     and a big glowing water blob engulfing the enemy (see Buizel reference) ─ */
+.waterOrb {
+  position: absolute;
+  left: 28%;
+  bottom: 40%;
+  width: calc(clamp(24px, 3vw, 38px) * var(--size, 1));
+  aspect-ratio: 1;
+  background: url('../assets/fx-mist.png') center / contain no-repeat;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 7px rgba(225, 242, 255, 0.95));
+  opacity: 0;
+  animation: waterTravel 520ms linear infinite;
+  animation-delay: calc(var(--i) * 70ms);
+}
+
+@keyframes waterTravel {
+  0%   { opacity: 0; left: 28%; bottom: 40%; transform: scale(0.6); }
+  12%  { opacity: 0.95; }
+  55%  { bottom: 47%; }
+  88%  { opacity: 0.9; }
+  100% { opacity: 0; left: 71.5%; bottom: 54%; transform: scale(1.25); }
+}
+
+/* soft glowing water mass swelling over the enemy, with a wispy tip and a
+   side puff for the irregular DS shape */
+.waterBurst {
+  position: absolute;
+  left: calc(77.5% - clamp(55px, 6.75vw, 85px));
+  bottom: 48%;
+  width: clamp(110px, 13.5vw, 170px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 58%, rgba(255, 255, 255, 1) 0%, rgba(238, 249, 255, 0.95) 38%, rgba(205, 232, 255, 0.55) 64%, transparent 80%);
+  filter: blur(1px) drop-shadow(0 0 22px rgba(215, 240, 255, 0.95));
+  animation: waterSwell 1150ms ease-out 480ms both;
+}
+
+.waterBurst::before {
+  content: '';
+  position: absolute;
+  left: 42%;
+  top: -14%;
+  width: 34%;
+  height: 42%;
+  border-radius: 60% 40% 55% 45% / 75% 70% 30% 25%;
+  background: radial-gradient(circle at 45% 70%, rgba(255, 255, 255, 0.95) 0%, rgba(225, 244, 255, 0.6) 60%, transparent 85%);
+  transform: rotate(14deg);
+}
+
+.waterBurst::after {
+  content: '';
+  position: absolute;
+  left: -12%;
+  bottom: 12%;
+  width: 44%;
+  height: 40%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(248, 253, 255, 0.9) 0%, rgba(215, 238, 255, 0.45) 60%, transparent 82%);
+}
+
+@keyframes waterSwell {
+  0%   { opacity: 0; transform: scale(0.3); }
+  18%  { opacity: 1; transform: scale(1); }
+  40%  { transform: scale(0.96); }
+  62%  { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 0; transform: scale(1.12); }
+}
+
+/* droplet specks scattering off the splash */
+.waterDrop {
+  position: absolute;
+  left: 71%;
+  bottom: 53%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f2faff;
+  box-shadow: 0 0 5px rgba(235, 248, 255, 0.95);
+  opacity: 0;
+  animation: dropFly 700ms ease-out forwards;
+  animation-delay: calc(540ms + var(--i) * 90ms);
+}
+
+@keyframes dropFly {
+  0%   { opacity: 0; transform: translate(0, 0); }
+  15%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)); }
+}
+
+/* ─ Grass: spinning leaves fly to the enemy, green burst on impact ─ */
+.leaf {
+  position: absolute;
+  left: 27%;
+  bottom: calc(38% + var(--lift, 0%));
+  width: clamp(16px, 1.8vw, 22px);
+  height: clamp(10px, 1.2vw, 14px);
+  border-radius: 0 100% 0 100%;
+  background: linear-gradient(135deg, #7ed058 0%, #4fae32 55%, #3f9428 100%);
+  opacity: 0;
+  animation: leafFly 620ms ease-in forwards;
+  animation-delay: calc(var(--i) * 95ms);
+}
+
+@keyframes leafFly {
+  0%   { opacity: 0; left: 27%; bottom: calc(38% + var(--lift, 0%)); transform: rotate(0deg) scale(0.8); }
+  10%  { opacity: 1; }
+  60%  { bottom: calc(52% + var(--lift, 0%)); }
+  88%  { opacity: 1; }
+  100% { opacity: 0; left: 70%; bottom: calc(54% + var(--lift, 0%) / 2); transform: rotate(660deg) scale(1); }
+}
+
+.grassBurst {
+  position: absolute;
+  left: calc(77.5% - clamp(55px, 6.5vw, 80px));
+  bottom: 50%;
+  width: clamp(110px, 13vw, 160px);
+  height: clamp(110px, 13vw, 160px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(150, 224, 100, 0.9) 0%, rgba(100, 190, 60, 0.5) 50%, transparent 70%);
+  animation: burstFlash 500ms ease-out 650ms both;
+}
+
+@keyframes burstFlash {
+  0%   { opacity: 0; transform: scale(0.3); }
+  35%  { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 0; transform: scale(1.3); }
+}
+
+/* ─ Dragon Pulse, HGSS style: purple aura ring + white core charge at the
+     player's mouth, then a stream of glowing mist puffs (fx-mist.png) that
+     grow toward the enemy and burst into a big soft cloud ─ */
+.pulseRing {
+  position: absolute;
+  left: calc(28% - clamp(35px, 4.25vw, 55px));
+  bottom: 34%;
+  width: clamp(70px, 8.5vw, 110px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 5px solid rgba(196, 128, 232, 0.85);
+  box-shadow:
+    0 0 16px rgba(190, 120, 230, 0.8),
+    inset 0 0 14px rgba(190, 120, 230, 0.7);
+  animation: ringCharge 650ms ease-out both;
+}
+
+@keyframes ringCharge {
+  0%   { opacity: 0; transform: scale(0.3); }
+  30%  { opacity: 1; transform: scale(1.1); }
+  60%  { opacity: 1; transform: scale(0.95); }
+  100% { opacity: 0; transform: scale(1.15); }
+}
+
+.pulseCore {
+  position: absolute;
+  left: calc(28% - clamp(28px, 3.4vw, 44px));
+  bottom: 36%;
+  width: clamp(56px, 6.8vw, 88px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(240, 228, 255, 0.9) 40%, rgba(210, 170, 245, 0.4) 70%, transparent 100%);
+  animation: coreCharge 650ms ease-out both;
+}
+
+@keyframes coreCharge {
+  0%   { opacity: 0; transform: scale(0.2); }
+  35%  { opacity: 1; transform: scale(1); }
+  70%  { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 0; transform: scale(0.9); }
+}
+
+/* mist puffs stream out of the charge point and grow as they fly */
+.pulsePuff {
+  position: absolute;
+  left: 29%;
+  bottom: 39%;
+  width: clamp(38px, 4.6vw, 58px);
+  aspect-ratio: 1;
+  background: url('../assets/fx-mist.png') center / contain no-repeat;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 8px rgba(230, 215, 255, 0.9));
+  opacity: 0;
+  animation: puffTravel 500ms ease-out both;
+  animation-delay: calc(360ms + var(--i) * 85ms);
+}
+
+@keyframes puffTravel {
+  0%   { opacity: 0; left: 29%; bottom: 39%; transform: scale(0.5); }
+  15%  { opacity: 1; }
+  60%  { bottom: 47%; }
+  90%  { opacity: 1; }
+  100% { opacity: 0; left: 69%; bottom: 51%; transform: scale(2.1); }
+}
+
+/* smoke burst clustered ON the enemy's body: main cloud + two side puffs */
+.pulseCloud {
+  position: absolute;
+  left: calc(77.5% - clamp(65px, 8vw, 100px));
+  bottom: 49%;
+  width: clamp(130px, 16vw, 200px);
+  aspect-ratio: 1;
+  background: url('../assets/fx-mist.png') center / contain no-repeat;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 20px rgba(228, 210, 255, 0.95)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+  animation: cloudBurst 950ms ease-out 780ms both;
+}
+
+.pulseCloud::before,
+.pulseCloud::after {
+  content: '';
+  position: absolute;
+  background: url('../assets/fx-mist.png') center / contain no-repeat;
+  image-rendering: pixelated;
+}
+
+.pulseCloud::before {
+  left: -28%;
+  bottom: -10%;
+  width: 68%;
+  height: 68%;
+}
+
+.pulseCloud::after {
+  right: -18%;
+  bottom: 34%;
+  width: 55%;
+  height: 55%;
+}
+
+@keyframes cloudBurst {
+  0%   { opacity: 0; transform: scale(0.35); }
+  25%  { opacity: 1; transform: scale(1); }
+  55%  { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(1.22); }
+}
+
+/* ─ Bite: white fang rows clamp shut on the enemy ─ */
+.fangTop,
+.fangBottom {
+  position: absolute;
+  left: calc(77.5% - clamp(50px, 6vw, 75px));
+  width: clamp(100px, 12vw, 150px);
+  height: clamp(28px, 3.4vw, 42px);
+  background: linear-gradient(180deg, #ffffff 0%, #e8e8e0 100%);
+  filter: drop-shadow(0 0 3px rgba(40, 40, 40, 0.6));
+  opacity: 0;
+}
+
+.fangTop {
+  bottom: 60%;
+  clip-path: polygon(0 0, 100% 0, 100% 35%, 83% 100%, 66% 35%, 50% 100%, 33% 35%, 17% 100%, 0 35%);
+  animation: fangCloseTop 550ms ease-in 150ms forwards;
+}
+
+.fangBottom {
+  bottom: 52%;
+  clip-path: polygon(0 100%, 100% 100%, 100% 65%, 83% 0, 66% 65%, 50% 0, 33% 65%, 17% 0, 0 65%);
+  animation: fangCloseBottom 550ms ease-in 150ms forwards;
+}
+
+@keyframes fangCloseTop {
+  0%   { opacity: 0; transform: translateY(-55px); }
+  20%  { opacity: 1; }
+  55%  { opacity: 1; transform: translateY(0); }
+  80%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(0); }
+}
+
+@keyframes fangCloseBottom {
+  0%   { opacity: 0; transform: translateY(55px); }
+  20%  { opacity: 1; }
+  55%  { opacity: 1; transform: translateY(0); }
+  80%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(0); }
+}
+
+.biteFlash {
+  position: absolute;
+  left: calc(77.5% - clamp(45px, 5.5vw, 68px));
+  bottom: 51%;
+  width: clamp(90px, 11vw, 136px);
+  height: clamp(70px, 8.5vw, 105px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(220, 220, 230, 0.4) 55%, transparent 70%);
+  animation: burstFlash 350ms ease-out 480ms both;
+}
+
+/* ── HP boxes (HGSS style: big, attached to the screen edges) ── */
+.hpBox {
+  position: absolute;
+  background: linear-gradient(180deg, #ffffff 0%, #f6f6ea 70%, #ecece0 100%);
+  border: 4px solid #4c5a64;
+  padding: 14px 18px;
+  width: clamp(260px, 30vw, 400px);
+  font-family: 'Press Start 2P', monospace;
+  color: #33383c;
+  box-shadow:
+    inset 0 -4px 0 rgba(0, 0, 0, 0.06),
+    0 4px 0 rgba(0, 0, 0, 0.18);
+  z-index: 3;
+}
+
+.enemyHpBox {
+  top: 5%;
+  left: 0;
+  border-left: none;
+  border-radius: 0 14px 14px 0;
+}
+
+.playerHpBox {
+  bottom: 31%; /* box + the EXP strip hanging below it must clear the dialog's outer border (top ≈ 27.5%) */
+  right: 0;
+  border-right: none;
+  border-radius: 14px 0 0 14px;
+}
+
+.hpTopRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: clamp(11px, 1.3vw, 15px);
+  margin-bottom: 11px;
+}
+
+.hpLevel {
+  color: #1e88a8;
+}
+
+.genderM {
+  color: #3068c8;
+  margin-left: 8px;
+}
+
+.genderF {
+  color: #e05068;
+  margin-left: 8px;
+}
+
+.hpBarRow {
+  display: flex;
+  align-items: center;
+}
+
+.hpLabel {
+  font-size: 9px;
+  color: #f8a030;
+  background: #4c5a64;
+  padding: 4px 5px 3px;
+  border-radius: 5px 0 0 5px;
+  flex-shrink: 0;
+}
+
+.hpTrack {
+  flex: 1;
+  height: 13px;
+  background: #4c5a64;
+  border-radius: 0 6px 6px 0;
+  overflow: hidden;
+  padding: 2px 3px 2px 0;
+}
+
+.hpFill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.hpGreen { background: linear-gradient(180deg, #7df8a0 0%, #40d465 45%, #2fbf55 100%); }
+.hpYellow { background: linear-gradient(180deg, #f8e878 0%, #f0d048 45%, #e0b830 100%); }
+.hpRed { background: linear-gradient(180deg, #f89078 0%, #e85038 45%, #d03828 100%); }
+
+.hpNumbers {
+  text-align: right;
+  font-size: clamp(11px, 1.3vw, 15px);
+  margin-top: 10px;
+}
+
+/* unlabeled segmented EXP strip hanging below the box, DPPt style:
+   sticks out past the box's left edge and carries tick-mark "breaks" */
+.expRow {
+  position: absolute;
+  left: 12px; /* inset — the strip starts slightly inside the box's left edge */
+  right: 0;
+  top: 100%;
+}
+
+.expTrack {
+  position: relative;
+  height: 10px;
+  background: #4c5a64;
+  border-radius: 0 0 0 5px;
+  overflow: hidden;
+  padding: 2px 3px;
+}
+
+/* segment breaks over both the fill and the empty track */
+.expTrack::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, transparent 0 7px, #38434c 7px 9px);
+}
+
+.expFill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #8ee8ff 0%, #38c0f0 50%, #28a8e0 100%);
+}
+
+/* ── Dialog — pinned to the bottom of the scene, site's double-border style ── */
+.dialogBox {
+  position: absolute;
+  left: 2.5%;
+  right: 2.5%;
+  bottom: 5%;
+  background: #fff;
+  border: 4px solid #1a1a1a;
+  padding: 18px 28px;
+  min-height: 84px;
+  display: flex;
+  align-items: center;
+  z-index: 4;
+}
+
+.dialogBox::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  background: #fff;
+  border: 4px solid #1a1a1a;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.dialogText {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(12px, 1.7vw, 18px);
+  color: #1a1a1a;
+  line-height: 1.9;
+}
+
+.dialogArrow {
+  position: absolute;
+  bottom: 10px;
+  right: 16px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  color: #1a1a1a;
+  animation: blink 1s linear infinite;
+}
+
+@keyframes blink {
+  0%, 49.9% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* ── Control panel (DS bottom screen: lavender + pokeball strip) ── */
+.panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #8ec84e 0%, #a8dc66 25%, #c0ee80 55%, #a4d85a 80%, #90c448 100%);
+  min-height: 0;
+}
+
+.panelStrip {
+  flex-shrink: 0;
+  height: 30px;
+  background: #6a9e38;
+  border-bottom: 3px solid #4e7820;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px;
+}
+
+.ball {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #e84040 0%, #e84040 42%, #2a2a2a 42%, #2a2a2a 58%, #f8f8f8 58%, #f8f8f8 100%);
+  border: 2px solid #2a2a2a;
+  flex-shrink: 0;
+}
+
+.stripLine {
+  flex: 1;
+  height: 3px;
+  background: #4e7820;
+  border-radius: 2px;
+}
+
+.ballFaded {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #8cb45a;
+  border: 2px solid #6a8e3a;
+  flex-shrink: 0;
+}
+
+.panelBody {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px 14px;
+  min-height: 0;
+  background: linear-gradient(180deg, #e0f8b0 0%, #f0fcd0 50%, #e0f8b0 100%);
+  margin: 6px 10px 10px;
+  border-radius: 24px;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.55) inset, 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+
+/* ── Player menu: big FIGHT plaque + BAG/RUN/POKéMON row ── */
+.menuWrap {
+  width: 100%;
+  max-width: min(760px, 98%);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fightBtn {
+  flex: 1;
+  min-height: 0;
+  max-height: 190px;
+  width: 84%;
+  align-self: center;
+  background: #d64550;
+  border: 4px solid #8c2830;
+  border-radius: 16px;
+  padding: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
+}
+
+.fightInner {
+  width: 100%;
+  height: 100%;
+  background: #c23842;
+  border: 3px solid #a02c36;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: #fff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(18px, 2.4vw, 26px);
+  letter-spacing: 3px;
+  text-shadow: 2px 2px 0 #5c161c, -2px 2px 0 #5c161c, 2px -2px 0 #5c161c, -2px -2px 0 #5c161c;
+}
+
+/* little CSS pokeball on the FIGHT button */
+.pokeball {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #f05050 0%, #f05050 42%, #303030 42%, #303030 58%, #f8f8f8 58%, #f8f8f8 100%);
+  border: 2px solid #303030;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.pokeball::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f8f8f8;
+  border: 2px solid #303030;
+}
+
+.subRow {
+  flex-shrink: 0;
+  display: flex;
+  gap: 12px;
+}
+
+.subBtn {
+  flex: 1;
+  border-radius: 12px;
+  padding: 6px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
+}
+
+.subInner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 6px;
+  border-radius: 8px;
+  color: #fff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(10px, 1.3vw, 14px);
+  letter-spacing: 1px;
+}
+
+.bagBtn {
+  background: #cf9c34;
+  border: 4px solid #7e5c14;
+}
+.bagBtn .subInner {
+  background: #ba8b28;
+  border: 3px solid #9a7220;
+  text-shadow: 1px 1px 0 #5c430e, -1px 1px 0 #5c430e, 1px -1px 0 #5c430e, -1px -1px 0 #5c430e;
+}
+
+.runBtn {
+  background: #4577cf;
+  border: 4px solid #24447e;
+}
+.runBtn .subInner {
+  background: #3a67ba;
+  border: 3px solid #2e549a;
+  text-shadow: 1px 1px 0 #142c58, -1px 1px 0 #142c58, 1px -1px 0 #142c58, -1px -1px 0 #142c58;
+}
+
+.pokemonBtn {
+  background: #45a04c;
+  border: 4px solid #226428;
+}
+.pokemonBtn .subInner {
+  background: #398c40;
+  border: 3px solid #2c7434;
+  text-shadow: 1px 1px 0 #12441a, -1px 1px 0 #12441a, 1px -1px 0 #12441a, -1px -1px 0 #12441a;
+}
+
+/* ── Move select ── */
+.moveWrap {
+  width: min(860px, 96%);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.moveGrid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+}
+
+.moveBtn {
+  border-radius: 12px;
+  padding: 6px;
+  cursor: pointer;
+  min-height: 0;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
+}
+
+.moveInner {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  text-align: left;
+}
+
+.bgFIRE {
+  background: #dd7a32;
+  border: 4px solid #96481a;
+}
+.bgFIRE .moveInner {
+  background: #f2b276;
+  border: 3px solid #c05818;
+}
+
+.bgGRASS {
+  background: #6fae4c;
+  border: 4px solid #3f7028;
+}
+.bgGRASS .moveInner {
+  background: #abd88b;
+  border: 3px solid #549c34;
+}
+
+.bgWATER {
+  background: #5581d3;
+  border: 4px solid #2c4c8c;
+}
+.bgWATER .moveInner {
+  background: #97b6ef;
+  border: 3px solid #3c64c8;
+}
+
+.bgNORMAL {
+  background: #a8a184;
+  border: 4px solid #6e6852;
+}
+.bgNORMAL .moveInner {
+  background: #d5cfb6;
+  border: 3px solid #88886c;
+}
+
+.bgDRAGON {
+  background: #4c30c0;
+  border: 4px solid #2a1880;
+}
+.bgDRAGON .moveInner {
+  background: #7458e8;
+  border: 3px solid #3c28a8;
+}
+
+.bgDARK {
+  background: #5a4840;
+  border: 4px solid #30261e;
+}
+.bgDARK .moveInner {
+  background: #7c6456;
+  border: 3px solid #3e2e26;
+}
+
+.moveName {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(11px, 1.4vw, 15px);
+  color: #26201a;
+  letter-spacing: 1px;
+}
+
+.moveMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.movePp {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(9px, 1.1vw, 12px);
+  color: #3a342c;
+}
+
+.typeBadge {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  color: #fff;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
+}
+
+.grass { background: #4e8234; }
+.fire { background: #b4501e; }
+.water { background: #2c5cb0; }
+.normal { background: #79735c; }
+.dragon { background: #3820a8; }
+.dark { background: #3a2c24; }
+
+.cancelBtn {
+  flex-shrink: 0;
+  align-self: center;
+  width: 60%;
+  background: #3868c0;
+  border: 4px solid #1e3c78;
+  border-radius: 12px;
+  padding: 6px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
+}
+
+.cancelBtn .subInner {
+  background: #2e58a8;
+  border: 3px solid #264a90;
+  letter-spacing: 3px;
+  text-shadow: 1px 1px 0 #10244c, -1px 1px 0 #10244c, 1px -1px 0 #10244c, -1px -1px 0 #10244c;
+}
+
+/* red selection ring — keep last so it beats the buttons' own box-shadows */
+.selected {
+  box-shadow: 0 0 0 4px #e63028, 0 4px 0 rgba(0, 0, 0, 0.25);
+}

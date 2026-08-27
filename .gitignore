@@ -1,0 +1,19 @@
+# dependencies / build output
+node_modules/
+dist/
+
+# logs / env
+npm-debug.log*
+*.local
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# local tooling state
+.playwright-mcp/
+.claude/settings.local.json
+
+# stray debug screenshots at the repo root (app assets live in src/assets & public)
+/*.png

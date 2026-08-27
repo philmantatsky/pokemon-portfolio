@@ -1,0 +1,266 @@
+.screen {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 24px;
+}
+
+/* ── Pokemon row ── */
+.pokemonRow {
+  display: flex;
+  gap: clamp(40px, 8vw, 96px);
+  align-items: flex-end;
+  justify-content: center;
+  padding-top: 60px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 12px 12px;
+  position: relative;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0));
+  /* no transition — animation handles hover state */
+}
+
+.card:disabled {
+  cursor: default;
+}
+
+.card.active {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+}
+
+.spriteSlot {
+  width: clamp(160px, 22vw, 220px);
+  height: clamp(80px, 10vw, 120px);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.sprite {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: clamp(160px, 22vw, 220px);
+  height: clamp(160px, 22vw, 220px);
+  object-fit: contain;
+  object-position: center bottom;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.spriteHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.spriteFlip {
+  transform: scaleX(-1);
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+}
+
+.nameCursor {
+  display: inline-block;
+  width: 1.3em;
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(11px, 1.5vw, 14px);
+}
+
+.pokemonName {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(11px, 1.5vw, 14px);
+  color: #222;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.typeBadge {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+.grass  { background: #78c850; }
+.fire   { background: #f08030; }
+.water  { background: #6890f0; }
+
+/* ── Dialog area (dialog + YES/NO side by side) ── */
+.dialogArea {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+/* ── Main dialog box ── */
+.dialogBox {
+  position: relative;
+  background: #fff;
+  border: 4px solid #1a1a1a;
+  padding: 24px 36px;
+  width: min(720px, 80vw);
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+}
+
+.dialogBox::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 4px solid #1a1a1a;
+  pointer-events: none;
+}
+
+.dialogText {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(14px, 2.4vw, 22px);
+  color: #1a1a1a;
+  line-height: 1.9;
+  white-space: nowrap;
+}
+
+/* ── YES/NO box (Pokemon Platinum style) ── */
+.yesNoBox {
+  position: relative;
+  background: #fff;
+  border: 4px solid #1a1a1a;
+  padding: 12px 16px;
+  margin-left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+  align-self: stretch;
+  justify-content: center;
+}
+
+.yesNoBox::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 4px solid #1a1a1a;
+  pointer-events: none;
+}
+
+.yesNoOption {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(13px, 1.8vw, 16px);
+  color: #1a1a1a;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  white-space: nowrap;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+}
+
+
+.yesNoOption:disabled {
+  cursor: default;
+}
+
+.cursor {
+  display: block;
+  width: 1.1em;
+  text-align: left;
+  flex-shrink: 0;
+  /* the ▶ falls back to a non-pixel font whose glyph sits low; lift it to the caps midline */
+  transform: translateY(-0.3em);
+}
+
+.optionLabel {
+  display: inline-block;
+  transition: transform 0.12s ease-out;
+}
+
+.optionLabelShift {
+  transform: translateX(-4px);
+}
+
+/* ── footer shortcut: skip straight to the portfolio ──
+   a small Platinum double-border dialog box (same recipe as .dialogBox).
+   It rests GREYED OUT — box and text — and wakes to the full black-on-white
+   box on hover, so it stays quiet next to the game UI but is clearly a
+   button the moment a visitor reaches for it */
+.skipBtn {
+  position: absolute;
+  bottom: clamp(22px, 4.5vh, 46px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  padding: clamp(12px, 1.8vh, 18px) clamp(16px, 2vw, 26px);
+  cursor: pointer;
+  background: transparent;
+  border: 4px solid #b9b9b9;
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(9px, 1.2vw, 13px);
+  letter-spacing: 1px;
+  color: #a2a2a2;
+  white-space: nowrap;
+}
+
+.skipBtn::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 4px solid #b9b9b9;
+  pointer-events: none;
+}
+
+.skipBtn:hover:not(:disabled) {
+  background: #fff;
+  border-color: #1a1a1a;
+  color: #1a1a1a;
+}
+
+.skipBtn:hover:not(:disabled)::before {
+  border-color: #1a1a1a;
+}
+
+.skipBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* reserved-width menu cursor, appears on hover like the game's menus */
+.skipCursor {
+  display: block;
+  width: 1.3em;
+  text-align: left;
+  flex-shrink: 0;
+  visibility: hidden;
+  transform: translateY(-0.25em);
+}
+
+.skipBtn:hover:not(:disabled) .skipCursor {
+  visibility: visible;
+}
+

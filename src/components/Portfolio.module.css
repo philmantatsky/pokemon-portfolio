@@ -1,0 +1,649 @@
+/* DPPt "Choose a Pokémon" party screen — 2 staggered columns of 6 slots,
+   tan-framed dialog box + blue CANCEL key along the bottom.
+   The slot panels are the REAL Diamond/Pearl/Platinum party-screen sprites
+   (Spriters Resource DP "Party Screen" sheet, asset 6971), 3-sliced so they
+   stretch to any width without distorting the pokéball; names/numbers render
+   from the games' own glyph sheets (see ppFont.js + pp-*.png in assets). */
+
+/* the DPPt text face for the DIALOG/menus (fan recreation "Pokémon DS Font"
+   by sergalbutt) — the slot text itself no longer uses a TTF at all */
+@font-face {
+  font-family: 'Pokemon DS';
+  src: url('../assets/pokemon-ds-font.ttf') format('truetype');
+  font-display: block;
+}
+
+.screen {
+  /* the game runs its panels almost flush to the screen edge (left column at
+     x=0 of the DS's 256px) — keep only a sliver of slate (user-tuned) */
+  --padX: clamp(3px, 0.4vw, 7px);
+  --padY: clamp(12px, 2vh, 22px);
+  /* shared by the slots (--u) and the striped backdrop math — keep in sync */
+  --slotH: clamp(104px, 22vh, 178px);
+  --slotGap: clamp(8px, 1.4vh, 16px);
+  --stagger: clamp(22px, 5.2vh, 56px);
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.4vh, 16px);
+  padding: var(--padY) var(--padX);
+  /* clip like the DS screen: with the panels near-flush, the selected slot's
+     orange ring pokes past the edge and the game crops it there too — and an
+     unclipped right-side ring would otherwise spawn a horizontal scrollbar */
+  overflow: hidden;
+  /* flat dark slate — the pinstripes live on the .party::before backdrop,
+     NOT here; the reference backdrop around them is plain */
+  background: #4b5266;
+}
+
+/* ── Header: name pinned left, resume/social keys centered on the screen ── */
+.header {
+  --u: calc(var(--slotH) / 45);
+  /* OVERLAYS the slate band instead of taking layout space — a flex-child
+     header pushed the whole party grid down (user-reported). The top offset
+     eyeballs the chips centered in the band above the panels. */
+  position: absolute;
+  top: clamp(12px, 2.6vh, 24px);
+  left: var(--padX);
+  right: var(--padX);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* name in the party glyphs, slightly smaller than a slot's name */
+.headerName {
+  --u: calc(var(--slotH) / 45 * 0.8);
+  position: absolute;
+  left: calc(4 * var(--u));
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.headerLinks {
+  display: flex;
+  align-items: center;
+  /* min raised so the chips' 5px outer rings can't collide at small widths */
+  gap: clamp(12px, 1vw, 16px);
+}
+
+/* mini versions of the tan-framed message box at the bottom of this screen:
+   white fill, gray inner border, tan band + brown outline via box-shadow —
+   same sizing/positioning as the white-chip pass, only the frame differs */
+.linkKey {
+  display: flex;
+  align-items: center;
+  padding: clamp(6px, 1vh, 10px) clamp(14px, 1.4vw, 22px);
+  background: #fff;
+  border: 3px solid #55565e;
+  border-radius: 2px;
+  box-shadow: 0 0 0 3px #b9aa80, 0 0 0 5px #57493a;
+  font-family: 'Pokemon DS', 'Press Start 2P', monospace;
+  font-size: clamp(16px, 1.7vw, 24px);
+  letter-spacing: 1px;
+  color: #4c4c54;
+  text-shadow: 1px 1px 0 #c8c8cc;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* hover fills with the parchment tan */
+.linkKey:hover {
+  background: #b9aa80;
+  color: #453a28;
+  text-shadow: 1px 1px 0 #d9cda6;
+}
+
+.linkKey:focus {
+  outline: none;
+}
+
+/* ── Party grid ── */
+.party {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: clamp(10px, 1.6vw, 22px);
+  /* own stacking context: the negative-z striped backdrop paints above the
+     screen backdrop but below every panel background */
+  isolation: isolate;
+}
+
+/* ONE continuous pinstriped rectangle behind BOTH columns, like the real
+   Platinum party screen: full-bleed to the screen edges, top edge on the left
+   column's first panel, bottom edge just past the right column's last panel
+   (the lowest, because of the stagger) — a single straight line top and
+   bottom, no per-column boxes, no slate gap between the columns.
+   The columns are vertically centered, so the left column's panel top sits at
+   (party height − column height)/2; the right column's stagger padding is
+   absorbed half above/half below by the centering, hence the stagger/2 term. */
+.party::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--padX));
+  right: calc(-1 * var(--padX));
+  top: calc(50% - (3 * var(--slotH) + 2 * var(--slotGap)) / 2 + 4px);
+  bottom: calc(
+    50% - (3 * var(--slotH) + 2 * var(--slotGap)) / 2 - var(--stagger) / 2 -
+      clamp(8px, 1.6vh, 14px)
+  );
+  /* high-contrast lines — near the backdrop tone they average out and vanish */
+  background: repeating-linear-gradient(180deg, #6a7288 0 2px, #232a3a 2px 5px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* content-sized wrapper for the column's slots */
+.colInner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--slotGap);
+}
+
+/* the right column hangs lower — the reference's stagger */
+.colRight {
+  padding-top: var(--stagger);
+}
+
+/* ── Slot: the authentic DPPt party panel ──
+   Everything inside is measured in --u = one pixel of the 126x45 panel
+   sprite, so the whole slot scales as one DS screen would. */
+.slot {
+  --u: calc(var(--slotH) / 45);
+  position: relative;
+  flex: 0 0 auto;
+  height: calc(45 * var(--u));
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  z-index: 0;
+}
+
+/* selected slot paints its orange ring OVER the neighbouring panels' edges,
+   exactly like the game (the ring lives outside the panel rect) */
+.slotOn {
+  z-index: 1;
+}
+
+/* three panel slices: left cap (ball + chamfered corner), stretched 1px
+   strip, right cap. All from the same sprite so the seams are invisible. */
+.panelL,
+.panelM,
+.panelR {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.panelL {
+  left: 0;
+  width: calc(44 * var(--u));
+  background-image: url(../assets/pp-slot.png);
+  background-size: calc(126 * var(--u)) calc(45 * var(--u));
+  background-position: 0 0;
+}
+
+.panelM {
+  /* extends 1u UNDER each cap (caps paint on top — see the JSX render order):
+     at fractional --u, abutting slices can miss by a subpixel and the striped
+     backdrop shows through as a dashed vertical line */
+  left: calc(43 * var(--u));
+  right: calc(5 * var(--u));
+  background-image: url(../assets/pp-strip.png);
+  background-size: 100% 100%;
+}
+
+.panelR {
+  right: 0;
+  width: calc(6 * var(--u));
+  background-image: url(../assets/pp-slot.png);
+  background-size: calc(126 * var(--u)) calc(45 * var(--u));
+  background-position: calc(-120 * var(--u)) 0;
+}
+
+/* slot 1 uses the special first-Pokémon panel: bigger ball, curved left */
+.slotFirst .panelL {
+  background-image: url(../assets/pp-first.png);
+}
+
+/* ── selected state: swap all three slices for the cyan + orange-ring
+   sprite. Its canvas is 130x49 with the panel content offset (+3,+3), so the
+   pieces hang 3u out on the top/left and 1u past the right/bottom. ── */
+.slotOn .panelL {
+  top: calc(-3 * var(--u));
+  bottom: calc(-1 * var(--u));
+  left: calc(-3 * var(--u));
+  width: calc(47 * var(--u));
+  background-image: url(../assets/pp-slot-sel.png);
+  background-size: calc(130 * var(--u)) calc(49 * var(--u));
+  background-position: 0 0;
+}
+
+.slotOn .panelM {
+  top: calc(-3 * var(--u));
+  bottom: calc(-1 * var(--u));
+  background-image: url(../assets/pp-strip-sel.png);
+}
+
+.slotOn .panelR {
+  top: calc(-3 * var(--u));
+  bottom: calc(-1 * var(--u));
+  right: calc(-2 * var(--u));
+  width: calc(9 * var(--u));
+  background-image: url(../assets/pp-slot-sel.png);
+  background-size: calc(130 * var(--u)) calc(49 * var(--u));
+  background-position: calc(-121 * var(--u)) 0;
+}
+
+.slotOn.slotFirst .panelL {
+  background-image: url(../assets/pp-first-sel.png);
+}
+
+/* ── party mini icon (32x64 sprite = 2 animation frames) over the ball ── */
+.icon {
+  position: absolute;
+  /* per the game: the mini sits to the RIGHT of the ball, overlapping only
+     its right side — the ball stays fully visible (user-matched reference) */
+  left: calc(10 * var(--u));
+  top: calc(-3 * var(--u));
+  width: calc(32 * var(--u));
+  height: calc(32 * var(--u));
+  background-size: calc(32 * var(--u)) calc(64 * var(--u));
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.slotFirst .icon {
+  left: calc(15 * var(--u));
+  top: calc(-1 * var(--u));
+}
+
+/* the selected slot's mini hops between its two frames, like the game.
+   The animation STARTS on the hop frame — starting on the resting frame
+   (identical to the static icon) makes selection feel laggy, since the
+   first visible change would only land half a cycle after the hover.
+   steps(2, jump-none) is REQUIRED: background-position is interpolable, and
+   percentage-pair keyframes (0%,49% / 50%,100%) leave a ~4ms window each
+   cycle where the sheet SLIDES between frames — paints landing in it showed
+   the sprite mid-slide (user-reported "spasm"). Stepped timing can only ever
+   output the two exact frame positions. */
+.slotOn .icon {
+  animation: iconHop 0.42s steps(2, jump-none) infinite;
+}
+
+@keyframes iconHop {
+  0% { background-position: 0 calc(-32 * var(--u)); }
+  100% { background-position: 0 0; }
+}
+
+/* ── name: Platinum system font glyphs (white + shadow) ── */
+.name {
+  position: absolute;
+  /* the game starts names at ~x44, clear of the icon's new position */
+  left: calc(44 * var(--u));
+  top: calc(4 * var(--u));
+  /* long names clip at the gender mark instead of spilling off the panel */
+  right: calc(14 * var(--u));
+  overflow: hidden;
+}
+
+.ptext {
+  display: inline-flex;
+  align-items: flex-start;
+}
+
+.pch {
+  flex: 0 0 auto;
+  /* cells carry a 1px pad each side for the outline; the negative margins
+     keep the ADVANCE equal to the glyph width, outlines overlapping */
+  width: calc((var(--gw) + 2) * var(--u));
+  margin: 0 calc(-1 * var(--u));
+  height: calc(16 * var(--u));
+  background-image: url(../assets/pp-font.png);
+  background-size: calc(var(--fw) * var(--u)) calc(16 * var(--u));
+  background-position: calc(-1 * var(--gx) * var(--u)) 0;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+.psp {
+  flex: 0 0 auto;
+  width: calc(3 * var(--u));
+}
+
+/* ── gender mark (colored system-font glyph, per the game's palette) ── */
+.gender {
+  position: absolute;
+  right: calc(5 * var(--u));
+  top: calc(5 * var(--u));
+  width: calc(6 * var(--u));
+  height: calc(10 * var(--u));
+  background-size: 100% 100%;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.genderM { background-image: url(../assets/pp-gender-m.png); }
+.genderF { background-image: url(../assets/pp-gender-f.png); }
+
+/* ── HP bar: the sprite's own bar in three slices (pill end / 1px of track /
+   rounded cap) so the track stretches with the panel ── */
+.hpBar {
+  position: absolute;
+  left: calc(48 * var(--u));
+  right: calc(9 * var(--u));
+  top: calc(22 * var(--u));
+  height: calc(6 * var(--u));
+  pointer-events: none;
+}
+
+.hpL,
+.hpM,
+.hpR {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  image-rendering: pixelated;
+}
+
+.hpL {
+  left: 0;
+  width: calc(16 * var(--u));
+  background-image: url(../assets/pp-bar-left.png);
+}
+
+.hpM {
+  /* tucked 1u under both end caps — same subpixel-seam rule as .panelM */
+  left: calc(15 * var(--u));
+  right: calc(5 * var(--u));
+  background-image: url(../assets/pp-bar-mid.png);
+}
+
+.hpR {
+  right: 0;
+  width: calc(6 * var(--u));
+  background-image: url(../assets/pp-bar-right.png);
+}
+
+/* ── Lv. + numbers: the party screen's bold digit glyphs ── */
+.lvRow {
+  position: absolute;
+  left: calc(8 * var(--u));
+  top: calc(29 * var(--u));
+  display: inline-flex;
+  align-items: flex-start;
+  pointer-events: none;
+}
+
+.lvIcon {
+  flex: 0 0 auto;
+  /* sprite is padded 1px all around for the outline */
+  width: calc(14 * var(--u));
+  height: calc(10 * var(--u));
+  margin-top: calc(2 * var(--u));
+  margin-left: calc(-1 * var(--u));
+  background-image: url(../assets/pp-lv.png);
+  background-size: 100% 100%;
+  image-rendering: pixelated;
+}
+
+.hpNum {
+  position: absolute;
+  right: calc(6 * var(--u));
+  top: calc(29 * var(--u));
+  pointer-events: none;
+}
+
+.pnum {
+  display: inline-flex;
+  align-items: flex-start;
+}
+
+/* 10px cells with 1px pads for the outline; negative margins keep the
+   game's 8px digit pitch, outlines overlapping like the reference */
+.ndigit {
+  flex: 0 0 auto;
+  width: calc(10 * var(--u));
+  margin: 0 calc(-1 * var(--u));
+  height: calc(12 * var(--u));
+  background-image: url(../assets/pp-num.png);
+  background-size: calc(110 * var(--u)) calc(12 * var(--u));
+  background-position: calc(-10 * var(--u) * var(--d)) 0;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+.nslash {
+  flex: 0 0 auto;
+  width: calc(10 * var(--u));
+  margin: 0 calc(-1 * var(--u));
+  height: calc(12 * var(--u));
+  background-image: url(../assets/pp-num.png);
+  background-size: calc(110 * var(--u)) calc(12 * var(--u));
+  background-position: calc(-100 * var(--u)) 0;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+/* ── About box: Platinum double-border card over the party ── */
+/* invisible click-catcher: any click outside the card dismisses it */
+.aboutBackdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+}
+
+.aboutBox {
+  --u: calc(var(--slotH) / 45);
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  z-index: 7;
+  width: min(780px, 76vw);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.4vh, 16px);
+  padding: clamp(18px, 2.6vh, 30px) clamp(20px, 2.2vw, 34px);
+  background: #fff;
+  border: 4px solid #1a1a1a;
+  /* double border via box-shadow — this box needs a z-index (stacking
+     context), so the negative-z ::before trick would paint over the inner
+     border, same as .actionMenu */
+  box-shadow: 0 0 0 8px #fff, 0 0 0 12px #1a1a1a;
+  cursor: pointer;
+}
+
+.aboutName {
+  --u: calc(var(--slotH) / 45 * 0.62);
+  align-self: center;
+  margin-bottom: clamp(2px, 0.6vh, 8px);
+  /* the white party glyphs need a dark plate to read on the white card —
+     a slim slate band like the game's trainer-card name bar */
+  padding: calc(2 * var(--u)) calc(6 * var(--u)) 0;
+  background: #4b5266;
+  border-radius: 6px;
+}
+
+.aboutText {
+  font-family: 'Pokemon DS', 'Press Start 2P', monospace;
+  font-size: clamp(18px, 2.2vw, 30px);
+  color: #4c4c54;
+  text-shadow: 1px 1px 0 #c8c8cc;
+  line-height: 1.3;
+}
+
+/* ── Context menu (SUMMARY / VISIT / GITHUB / CANCEL) ── */
+.actionMenu {
+  position: absolute;
+  right: clamp(24px, 4vw, 60px);
+  bottom: clamp(120px, 20vh, 190px);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 18px;
+  background: #fff;
+  border: 4px solid #1a1a1a;
+  /* the Platinum double border. NOT the ::before { inset: -8px } trick — this
+     box needs a z-index to clear the sprites, which makes it a stacking
+     context, and a negative-z ::before then paints over the inner border
+     instead of behind it. box-shadow is immune to stacking order. */
+  box-shadow: 0 0 0 8px #fff, 0 0 0 12px #1a1a1a;
+}
+
+.actionRow {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 6px 4px;
+  cursor: pointer;
+}
+
+.cursor {
+  display: block;
+  width: 1.1em;
+  flex-shrink: 0;
+  text-align: left;
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(10px, 1.2vw, 14px);
+  color: #1a1a1a;
+  /* breathing room between the ▶ and the label (user-tuned) */
+  margin-right: 0.5em;
+  /* flex centering alone lands the ▶ on the DS-font caps midline — the old
+     -0.3em "lift to the caps midline" rode too high (user-tuned) */
+  transform: none;
+}
+
+.actionLabel {
+  display: inline-block;
+  font-family: 'Pokemon DS', 'Press Start 2P', monospace;
+  font-size: clamp(22px, 2.8vw, 34px);
+  color: #4c4c54;
+  text-shadow: 1px 1px 0 #c8c8cc;
+  letter-spacing: 1px;
+  transition: transform 0.12s ease-out;
+}
+
+.actionLabelShift {
+  transform: translateX(-4px);
+}
+
+/* ── Bottom bar: tan-framed dialog + floating CANCEL (reference bottom) ── */
+.bottomBar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: clamp(24px, 3.4vw, 52px);
+  /* room for the dialog's tan box-shadow frame — must cover the frame width
+     on its own now that the screen padding is only a few px */
+  margin: clamp(8px, 1.2vh, 14px) clamp(10px, 1vw, 14px) clamp(4px, 0.8vh, 10px);
+}
+
+.dialogBox {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  /* FIXED height for exactly two lines (em-based off the text size below) —
+     the box must never grow with longer summaries, or the whole party grid
+     shifts up when a project is opened (user-reported). Keep blurbs ≤ 2
+     lines; anything longer clips. */
+  font-size: clamp(24px, 3vw, 38px);
+  height: calc(2.6em + 16px);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: 8px clamp(14px, 1.8vw, 26px);
+  background: #fff;
+  /* DPPt message box: gray inner border, then a thick tan frame with a dark
+     brown outline (box-shadow rings — it is a frame around the box, NOT a
+     full-width tan strip). Not the Platinum double border. */
+  border: 4px solid #55565e;
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 clamp(7px, 0.9vw, 11px) #b9aa80,
+    0 0 0 calc(clamp(7px, 0.9vw, 11px) + 3px) #57493a;
+}
+
+.dialogText {
+  font-family: 'Pokemon DS', 'Press Start 2P', monospace;
+  font-size: inherit;
+  /* DPPt dialog text is dark gray with a pale drop shadow, not black */
+  color: #4c4c54;
+  text-shadow: 1px 1px 0 #c8c8cc;
+  /* tight line-to-line spacing like the game's two-line message boxes; at
+     narrow widths a summary may wrap to a 3rd line — cap the block at two
+     full lines so it clips whole-line, not half-line */
+  line-height: 1.25;
+  max-height: 2.5em;
+  overflow: hidden;
+}
+
+.cancelBtn {
+  flex-shrink: 0;
+  align-self: center;
+  width: clamp(120px, 15vw, 200px);
+  height: clamp(50px, 9.5vh, 84px);
+  padding: 0;
+  cursor: pointer;
+  border-radius: 10px;
+  /* vivid DS blue key, two hard tones, floating on the slate with a thin
+     light rim (reference) */
+  background: linear-gradient(180deg, #4a78f0 0 46%, #3054d0 46% 100%);
+  border: 3px solid #16286c;
+  box-shadow: 0 0 0 2px #dfe6f2;
+}
+
+.cancelInner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 7px;
+  font-family: 'Pokemon DS', 'Press Start 2P', monospace;
+  font-size: clamp(24px, 3vw, 38px);
+  letter-spacing: 1px;
+  color: #fff;
+  text-shadow: 1px 1px 0 #14285c, -1px 1px 0 #14285c, 1px -1px 0 #14285c, -1px -1px 0 #14285c;
+}
+
+/* a mouse-clicked button keeps DOM focus, and the UA focus ring then reads as a
+   second selection marker next to the selection ring — the sprite ring is the
+   indicator here */
+.slot:focus,
+.cancelBtn:focus,
+.actionRow:focus {
+  outline: none;
+}
+
+/* CANCEL keeps its blue key look when selected — the slot .slotOn styling all
+   lives on the panel slices, so the key only needs its own red ring */
+.cancelBtn.slotOn {
+  background: linear-gradient(180deg, #4a78f0 0 46%, #3054d0 46% 100%);
+  border-color: #16286c;
+  box-shadow: 0 0 0 3px #d83010;
+}
