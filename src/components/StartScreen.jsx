@@ -18,7 +18,7 @@ export default function StartScreen({ onStart }) {
         </p>
         <p className={styles.name}>PHILLIP MANTATSKY</p>
       </div>
-      <p className={styles.copyright}>© 2024</p>
+      <p className={styles.copyright}>© 2026</p>
     </div>
   )
 }
