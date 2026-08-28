@@ -2,6 +2,8 @@
   position: relative;
   width: 100vw;
   height: 100vh;
+  /* dynamic-viewport height where supported (iOS toolbar) — = vh on desktop */
+  height: 100dvh;
   background: #f0f0f0;
   display: flex;
   flex-direction: column;
@@ -52,7 +54,9 @@
 
 .sprite {
   position: absolute;
-  bottom: 0;
+  /* the JSX feeds each sprite's baked-padding feet offset through --drop
+     (was an inline `bottom`) so the mobile block below can rescale it */
+  bottom: var(--drop, 0px);
   left: 0;
   right: 0;
   margin: 0 auto;
@@ -262,5 +266,84 @@
 
 .skipBtn:hover:not(:disabled) .skipCursor {
   visibility: visible;
+}
+
+/* ═══════════════ MOBILE (≤ 720px) ═══════════════
+   720, not 520: the 3-across row's clamp MINIMUMS total 632px, so anything
+   under ~700px overflows. Media-scoped overrides only — the desktop rules
+   above stay untouched. */
+@media (max-width: 720px) {
+  .screen {
+    padding: 16px 8px;
+    gap: 20px;
+  }
+  .pokemonRow {
+    gap: 2.5vw;
+    padding-top: 24px;
+  }
+  .card {
+    padding: 0 4px 8px;
+  }
+  .spriteSlot {
+    width: clamp(92px, 24vw, 150px);
+    height: clamp(46px, 12vw, 75px);
+  }
+  .sprite {
+    width: clamp(92px, 24vw, 150px);
+    height: clamp(92px, 24vw, 150px);
+    /* the hard-px feet offsets were tuned against the 220px desktop sprite —
+       halve them for the roughly-half-size mobile sprite */
+    bottom: calc(var(--drop, 0px) * 0.5);
+  }
+  .nameCursor,
+  .pokemonName {
+    font-size: 9px;
+  }
+
+  /* dialog text wraps instead of nowrap-spilling past the border */
+  .dialogBox {
+    width: min(92vw, 720px);
+    padding: 16px 18px;
+    min-height: 76px;
+  }
+  .dialogText {
+    white-space: normal;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* YES/NO floats below-right of the dialog instead of beside it (the
+     side-by-side pair is 443px minimum) — an overlay, so its appearance
+     never shoves the centered layout */
+  .yesNoBox {
+    position: absolute;
+    top: calc(100% + 14px);
+    right: 0;
+    margin-left: 0;
+    align-self: auto;
+  }
+
+  /* skip box: 33 nowrap chars at the 9px floor + rings ≈ 390px — shrink */
+  .skipBtn {
+    font-size: 8px;
+    padding: 10px 12px;
+  }
+}
+
+/* touch devices never hover: the skip box's greyed rest state would never
+   wake, hiding the recruiter fast-path — render it awake by default there
+   (desktop is hover-capable, so nothing changes on it) */
+@media (hover: none) {
+  .skipBtn {
+    background: #fff;
+    border-color: #1a1a1a;
+    color: #1a1a1a;
+  }
+  .skipBtn::before {
+    border-color: #1a1a1a;
+  }
+  .skipCursor {
+    visibility: visible;
+  }
 }
 

@@ -9,7 +9,8 @@
    by sergalbutt) — the slot text itself no longer uses a TTF at all */
 @font-face {
   font-family: 'Pokemon DS';
-  src: url('../assets/pokemon-ds-font.ttf') format('truetype');
+  /* served from public/ (unhashed) so index.html can <link rel="preload"> it */
+  src: url('/pokemon-ds-font.ttf') format('truetype');
   font-display: block;
 }
 
@@ -651,4 +652,128 @@
   background: linear-gradient(180deg, #4a78f0 0 46%, #3054d0 46% 100%);
   border-color: #16286c;
   box-shadow: 0 0 0 3px #d83010;
+}
+
+/* ═══════════════ MOBILE — PHONE TIER (≤ 520px) ═══════════════
+   Media-scoped overrides ONLY — every desktop rule above stays untouched.
+   The party reflows to ONE column of 6 slots, and --slotH (hence --u, hence
+   every sprite in the file) is re-derived from WIDTH: the desktop --slotH is
+   vh-only and maxes out on tall phones, which put desktop-scale 44u left
+   caps inside ~180px columns — names and HP bars resolved to zero width. */
+@media (max-width: 520px) {
+  .screen {
+    --padY: 8px;
+    --slotGap: 6px;
+    /* width bound: panel ≥ 175u so "LLM DEBATE SIMULATOR" (43u name start +
+       ~115u of glyphs + 14u right margin) fits. height bound: ~250px of
+       vertical chrome (padY + stacked header + 2 screen gaps + stacked
+       bottom bar) split across 6 slots. The dvh line wins where supported. */
+    --slotH: min(calc((100vw - 6px) * 45 / 175), calc((100vh - 250px) / 6 - 5px));
+    --slotH: min(calc((100vw - 6px) * 45 / 175), calc((100dvh - 250px) / 6 - 5px));
+  }
+
+  /* header joins the layout flow and stacks name-over-chips: the desktop
+     absolute overlay has no slate band to sit in once the party is 1-col */
+  .header {
+    position: static;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .headerName {
+    position: static;
+    transform: none;
+  }
+  .linkKey {
+    padding: 4px 8px;
+    font-size: 13px;
+  }
+
+  /* ONE column: the two column wrappers stop generating boxes and the six
+     slot buttons become .party's own flex items. DOM order is 0,2,4,1,3,5,
+     so `order` restores 1..6. Only the non-interactive wrapper divs get
+     display:contents — the buttons keep their boxes (focus/click intact),
+     and .colRight's stagger padding vanishes along with its box. */
+  .party {
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--slotGap);
+  }
+  .col,
+  .colInner {
+    display: contents;
+  }
+  .col:not(.colRight) .slot:nth-child(1) { order: 1; }
+  .col:not(.colRight) .slot:nth-child(2) { order: 3; }
+  .col:not(.colRight) .slot:nth-child(3) { order: 5; }
+  .colRight .slot:nth-child(1) { order: 2; }
+  .colRight .slot:nth-child(2) { order: 4; }
+  .colRight .slot:nth-child(3) { order: 6; }
+
+  /* pinstripe for the single centered column: same +4px tuck below the first
+     panel's top and small overhang past the last — no stagger term */
+  .party::before {
+    top: calc(50% - (6 * var(--slotH) + 5 * var(--slotGap)) / 2 + 4px);
+    bottom: calc(
+      50% - (6 * var(--slotH) + 5 * var(--slotGap)) / 2 - clamp(6px, 1vh, 10px)
+    );
+  }
+
+  /* bottom bar stacks: full-width dialog with a fixed FOUR-line height at
+     14px (the desktop 24px font floor is why summaries clipped to nothing),
+     CANCEL below-right. The fixed-height principle stays — the box must
+     never grow and shove the party grid. */
+  .bottomBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin: 8px 10px 10px;
+  }
+  .dialogBox {
+    font-size: 14px;
+    height: calc(5.1em + 16px);
+  }
+  .dialogText {
+    max-height: 5em;
+  }
+  .cancelBtn {
+    align-self: flex-end;
+    width: 112px;
+    height: 40px;
+  }
+  .cancelInner {
+    font-size: 20px;
+  }
+
+  /* clear the taller stacked bottom bar */
+  .actionMenu {
+    right: 12px;
+    bottom: 170px;
+  }
+
+  .aboutBox {
+    width: min(92vw, 780px);
+  }
+  .aboutText {
+    font-size: 15px;
+  }
+}
+
+/* ═══════════════ MOBILE — TABLET TIER (521–900px) ═══════════════
+   Keep the desktop two-column party but cap --slotH by WIDTH so each ~50vw
+   column stays ≥ 175u and long names still fit (at 768px the desktop vh
+   clamp yields u≈3.96 inside 95u-wide columns). ≥ 901px is untouched. */
+@media (min-width: 521px) and (max-width: 900px) {
+  .screen {
+    --slotH: min(clamp(104px, 22vh, 178px), calc((100vw - 20px) * 45 / 350));
+  }
+  .headerLinks {
+    gap: 12px;
+  }
+  .linkKey {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+  .dialogBox {
+    font-size: 18px;
+  }
 }

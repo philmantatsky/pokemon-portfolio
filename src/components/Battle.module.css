@@ -1161,3 +1161,70 @@
 .selected {
   box-shadow: 0 0 0 4px #e63028, 0 4px 0 rgba(0, 0, 0, 0.25);
 }
+
+/* ═══════════════ MOBILE (≤ 520px) ═══════════════
+   Media-scoped overrides only — desktop rules above stay untouched.
+   NOTE: no box-shadow on any button in this block: .selected (above) must
+   remain the last box-shadow authority on the menu/move buttons. */
+@media (max-width: 520px) {
+  /* HP boxes floor at 260px = ~67vw on phones and blanket the scene — cap
+     by vw and compact the chrome */
+  .hpBox {
+    width: min(62vw, 260px);
+    padding: 8px 12px;
+  }
+  .hpTopRow {
+    font-size: 10px;
+    margin-bottom: 6px;
+  }
+  .hpNumbers {
+    font-size: 10px;
+    margin-top: 6px;
+  }
+  .hpTrack {
+    height: 11px;
+  }
+  /* anchor the player box a fixed distance above the dialog instead of 31%
+     of a shrinking scene: 5% dialog offset + ~76px two-line phone dialog +
+     8px outer ring + room for the hanging EXP strip. (3-line wraps only
+     happen in trainerIntro/outro, when the HP boxes are unmounted.) */
+  .playerHpBox {
+    bottom: calc(5% + 96px);
+  }
+
+  /* dialog: lower floor so the long trainer-intro lines wrap to ≤ 3 lines
+     inside the box */
+  .dialogBox {
+    padding: 14px 16px;
+    min-height: 64px;
+  }
+  .dialogText {
+    font-size: 11px;
+    line-height: 1.8;
+  }
+  .dialogArrow {
+    font-size: 12px;
+    right: 12px;
+    bottom: 8px;
+  }
+
+  /* move grid: keep name + type badge + PP inside the ~160px cells (the
+     badge and PP overlapped at the desktop floors) */
+  .moveGrid {
+    gap: 8px;
+  }
+  .moveInner {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+  .moveName {
+    font-size: 10px;
+  }
+  .movePp {
+    font-size: 8px;
+  }
+  .moveMeta {
+    flex-wrap: wrap;
+    gap: 2px 6px;
+  }
+}

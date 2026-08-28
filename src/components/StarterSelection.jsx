@@ -102,14 +102,14 @@ export default function StarterSelection({ onSelect, onSkip }) {
                   src={p.sprite}
                   alt={p.name}
                   className={`${styles.sprite} ${isAnimated ? styles.spriteHidden : ''}`}
-                  style={{ bottom: p.bottomOffset }}
+                  style={{ '--drop': p.bottomOffset }}
                   draggable={false}
                 />
                 <img
                   src={p.hoverSprite}
                   alt=""
                   className={`${styles.sprite} ${styles.spriteFlip} ${isAnimated ? '' : styles.spriteHidden}`}
-                  style={{ bottom: p.hoverBottomOffset }}
+                  style={{ '--drop': p.hoverBottomOffset }}
                   draggable={false}
                 />
               </div>

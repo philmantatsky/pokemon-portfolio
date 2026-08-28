@@ -15,3 +15,10 @@ html, body, #root {
 body {
   overflow: hidden;
 }
+
+/* touch: kill the double-tap-zoom delay and the gray tap flash on every
+   control (no visual effect with a mouse) */
+button, a {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}

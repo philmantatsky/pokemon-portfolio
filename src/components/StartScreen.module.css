@@ -1,6 +1,9 @@
 .screen {
   width: 100vw;
   height: 100vh;
+  /* dynamic-viewport height where supported: iOS Safari's 100vh includes the
+     retracted toolbar band, which this line excludes (identical on desktop) */
+  height: 100dvh;
   background: #000;
   display: flex;
   flex-direction: column;
@@ -70,4 +73,16 @@
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
+}
+
+/* ═══════════════ MOBILE (≤ 520px) ═══════════════
+   media-scoped overrides only — desktop rules above stay untouched */
+@media (max-width: 520px) {
+  /* at the 28px clamp floor one font-pixel is 3.5px, so the desktop 4px hard
+     shadow detaches into a ghost copy of the title — keep it under a pixel */
+  .title {
+    text-shadow:
+      2px 2px 0 #555,
+      0 0 18px rgba(255, 255, 255, 0.12);
+  }
 }
