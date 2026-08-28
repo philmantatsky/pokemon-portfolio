@@ -2,6 +2,8 @@
 
 React + Vite portfolio site styled as a Pokemon Platinum DS battle sequence.
 
+Repo: `github.com/philmantatsky/pokemon-portfolio` (public, pushed 2026-08-27). Git identity is set **repo-locally** to the GitHub noreply address (`148787581+philmantatsky@users.noreply.github.com`) — global git user.name/email are unconfigured on this machine. `.gitignore` excludes `node_modules`, `dist`, `.playwright-mcp`, `.claude/settings.local.json`, and root-level `/*.png` (debug screenshots; app assets in `src/assets` and `public/` are tracked).
+
 ## Stack
 
 - React + Vite
