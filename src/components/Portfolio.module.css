@@ -299,8 +299,13 @@
 /* ── name: Platinum system font glyphs (white + shadow) ── */
 .name {
   position: absolute;
-  /* the game starts names at ~x44, clear of the icon's new position */
-  left: calc(44 * var(--u));
+  /* the game starts names at ~x44, clear of the icon's new position.
+     left is 43u + 1u padding (not a plain 44u) so the clip box includes the
+     first glyph's left-outline column, which its -1u margin hangs outside the
+     content box — with left:44u the overflow:hidden chops that outline off
+     (user-reported). Fill still lands at exactly 44u */
+  left: calc(43 * var(--u));
+  padding-left: calc(1 * var(--u));
   top: calc(4 * var(--u));
   /* long names clip at the gender mark instead of spilling off the panel */
   right: calc(14 * var(--u));
