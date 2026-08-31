@@ -420,10 +420,11 @@ export default function Portfolio({ onExit }) {
             engineers don't spend their mornings reading logs.
           </p>
           <p className={styles.aboutText}>
-            On my own time I'm teaching a camera to recognize 20,000+
-            Pokémon cards and price them in real time, and I once pointed an
-            arbitrage bot at Kalshi and Vegas odds for 14 days just to see
-            if the prices ever disagreed. (They did.)
+            Outside of work I've been building a computer-vision scanner
+            that can ID any of 20,000+ Pokémon cards and pull live market
+            prices, plus an arbitrage bot from a UChicago hackathon that
+            compared Kalshi prediction markets to Vegas odds for two weeks.
+            Both are in the slots behind this card.
           </p>
           <p className={styles.aboutText}>
             Off screen: watching Attack on Titan, playing pickleball, and
