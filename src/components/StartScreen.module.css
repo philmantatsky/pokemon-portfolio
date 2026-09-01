@@ -23,17 +23,19 @@
 
 .title {
   font-family: 'Press Start 2P', monospace;
-  /* 17 chars ("PHILLIP MANTATSKY") on one line — sized to fit ~90vw at every
-     viewport width (17·fs + 17·4px letter-spacing) */
-  font-size: clamp(13px, 4.2vw, 42px);
+  font-size: clamp(28px, 6vw, 52px);
   color: #fff;
-  letter-spacing: 4px;
-  white-space: nowrap;
-  /* em-based shadow stays under one font-pixel (0.125em) at any size — this
-     replaced the old fixed 4px shadow + its ≤520px 2px patch */
+  letter-spacing: 6px;
   text-shadow:
-    0.1em 0.1em 0 #555,
-    0 0 1em rgba(255, 255, 255, 0.15);
+    4px 4px 0px #555,
+    0 0 40px rgba(255,255,255,0.15);
+}
+
+.subtitle {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(12px, 2.5vw, 20px);
+  color: #ccc;
+  letter-spacing: 8px;
 }
 
 .pressStart {
@@ -54,7 +56,9 @@
 
 .name {
   font-family: 'Press Start 2P', monospace;
-  font-size: clamp(7px, 1.2vw, 11px);
+  /* ~1.6x the original clamp(7px, 1.2vw, 11px) — reads clearly without
+     challenging the PORTFOLIO subtitle (20px max) above it */
+  font-size: clamp(12px, 2vw, 18px);
   color: #888;
   letter-spacing: 3px;
 }
@@ -71,4 +75,16 @@
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
+}
+
+/* ═══════════════ MOBILE (≤ 520px) ═══════════════
+   media-scoped overrides only — desktop rules above stay untouched */
+@media (max-width: 520px) {
+  /* at the 28px clamp floor one font-pixel is 3.5px, so the desktop 4px hard
+     shadow detaches into a ghost copy of the title — keep it under a pixel */
+  .title {
+    text-shadow:
+      2px 2px 0 #555,
+      0 0 18px rgba(255, 255, 255, 0.12);
+  }
 }
