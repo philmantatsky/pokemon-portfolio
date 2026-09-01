@@ -668,8 +668,8 @@
        ~115u of glyphs + 14u right margin) fits. height bound: ~250px of
        vertical chrome (padY + stacked header + 2 screen gaps + stacked
        bottom bar) split across 6 slots. The dvh line wins where supported. */
-    --slotH: min(calc((100vw - 6px) * 45 / 175), calc((100vh - 250px) / 6 - 5px));
-    --slotH: min(calc((100vw - 6px) * 45 / 175), calc((100dvh - 250px) / 6 - 5px));
+    --slotH: min(calc((100vw - 6px) * 45 / 175), calc((100vh - 262px) / 6 - 5px));
+    --slotH: min(calc((100vw - 6px) * 45 / 175), calc((100dvh - 262px) / 6 - 5px));
   }
 
   /* header joins the layout flow and stacks name-over-chips: the desktop
@@ -729,7 +729,11 @@
     margin: 8px 10px 10px;
   }
   .dialogBox {
-    font-size: 14px;
+    /* 16px (was 14): user asked for bigger summaries 2026-09-01. The box
+       height/max-height are em-based so the 4-line geometry scales with it —
+       the longest summary (AI CARD SCANNER) must still fit 4 lines at 360px;
+       the --slotH chrome budget (262px) and .actionMenu bottom track this */
+    font-size: 16px;
     height: calc(5.1em + 16px);
   }
   .dialogText {
@@ -744,10 +748,10 @@
     font-size: 20px;
   }
 
-  /* clear the taller stacked bottom bar */
+  /* clear the taller stacked bottom bar (dialog 97.6px + gap + CANCEL) */
   .actionMenu {
     right: 12px;
-    bottom: 170px;
+    bottom: 178px;
   }
 
   .aboutBox {
