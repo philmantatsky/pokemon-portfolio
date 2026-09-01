@@ -11,12 +11,15 @@ export default function StartScreen({ onStart }) {
   return (
     <div className={styles.screen} onClick={onStart}>
       <div className={styles.content}>
-        <p className={styles.title}>POKEMON</p>
-        <p className={styles.subtitle}>PORTFOLIO</p>
+        {/* name gets the big logo slot; the theme drops to the small line —
+            PHILLIP/POKEMON are both 7 chars and MANTATSKY/PORTFOLIO both 9,
+            so the swap keeps the original balance exactly */}
+        <p className={styles.title}>PHILLIP</p>
+        <p className={styles.subtitle}>MANTATSKY</p>
         <p className={styles.pressStart}>
           <span className={styles.pressCursor}>▶</span> PRESS START
         </p>
-        <p className={styles.name}>PHILLIP MANTATSKY</p>
+        <p className={styles.name}>POKEMON PORTFOLIO</p>
       </div>
       <p className={styles.copyright}>© 2026</p>
     </div>
