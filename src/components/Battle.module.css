@@ -1191,6 +1191,25 @@
   .playerHpBox {
     bottom: calc(5% + 96px);
   }
+  /* the player's box reads a step smaller than the enemy's (user-requested):
+     ~15% narrower with its type one notch down. The hanging EXP strip lives
+     inside the box width, so it scales along; the px bottom anchor above is
+     unchanged (a shorter box only gains clearance from the enemy sprite) */
+  .playerHpBox {
+    width: min(53vw, 200px);
+    padding: 6px 10px;
+  }
+  .playerHpBox .hpTopRow {
+    font-size: 9px;
+    margin-bottom: 5px;
+  }
+  .playerHpBox .hpNumbers {
+    font-size: 9px;
+    margin-top: 5px;
+  }
+  .playerHpBox .hpTrack {
+    height: 9px;
+  }
 
   /* dialog: lower floor so the long trainer-intro lines wrap to ≤ 3 lines
      inside the box */
@@ -1208,23 +1227,36 @@
     bottom: 8px;
   }
 
-  /* move grid: keep name + type badge + PP inside the ~160px cells (the
-     badge and PP overlapped at the desktop floors) */
+  /* move grid: name + type badge + PP must share the ~150px cells with NO
+     wrap or overlap. Measured at 375px: the meta row offers ~107px but
+     badge(7px font, 64px) + PP(8px, 64px) needed 128 — so every button
+     wrapped to stacked badge/PP. New budget: badge 6px font ≈ 51px +
+     PP 7px ≈ 56px = 107px vs a widened ~110px (360px screens) – 118px
+     (375px) row. flex-wrap stays only as a fallback for sub-360 screens */
   .moveGrid {
-    gap: 8px;
+    gap: 7px;
+  }
+  .moveBtn {
+    padding: 4px;
   }
   .moveInner {
-    padding: 8px 10px;
+    padding: 8px 7px;
     gap: 6px;
   }
   .moveName {
-    font-size: 10px;
+    font-size: 9px;
   }
   .movePp {
-    font-size: 8px;
+    font-size: 7px;
+  }
+  .typeBadge {
+    font-size: 6px;
+    padding: 2px 4px;
   }
   .moveMeta {
     flex-wrap: wrap;
-    gap: 2px 6px;
+    /* NO column-gap: space-between separates the pair when they share the
+       row, and a gap here is what pushed 6-char badges to wrap at 360px */
+    gap: 2px 0;
   }
 }
