@@ -336,7 +336,13 @@ export default function Battle({ starter, onFinish }) {
   }, [dialogText])
 
   return (
-    <div className={styles.screen}>
+    <div
+      className={styles.screen}
+      /* while the dialog waits (blinking ▶), a click ANYWHERE advances — the
+         menu/move buttons only exist in non-waiting phases, so no double-fires */
+      onClick={dialogWaits ? advanceDialog : undefined}
+      style={{ cursor: dialogWaits ? 'pointer' : undefined }}
+    >
       {/* ── Scene ── */}
       <div className={styles.scene}>
         <div className={styles.sky} />
@@ -509,12 +515,7 @@ export default function Battle({ starter, onFinish }) {
         )}
 
         {/* Dialog — bottom of the scene, like the DS top screen */}
-        <div
-          ref={dialogRef}
-          className={styles.dialogBox}
-          onClick={dialogWaits ? advanceDialog : undefined}
-          style={{ cursor: dialogWaits ? 'pointer' : 'default' }}
-        >
+        <div ref={dialogRef} className={styles.dialogBox}>
           <p className={styles.dialogText}>{dialogText}</p>
           {dialogWaits && <span className={styles.dialogArrow}>▶</span>}
         </div>
