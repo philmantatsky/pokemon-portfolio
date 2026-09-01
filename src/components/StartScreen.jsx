@@ -11,7 +11,7 @@ export default function StartScreen({ onStart }) {
   return (
     <div className={styles.screen} onClick={onStart}>
       <div className={styles.content}>
-        {/* name rides above the logo like an eyebrow line */}
+        {/* the name is the hero line; POKEMON sits demoted beneath it */}
         <p className={styles.name}>PHILLIP MANTATSKY</p>
         <p className={styles.title}>POKEMON</p>
         <p className={styles.subtitle}>PORTFOLIO</p>

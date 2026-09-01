@@ -23,12 +23,17 @@
 
 .title {
   font-family: 'Press Start 2P', monospace;
-  font-size: clamp(28px, 6vw, 52px);
-  color: #fff;
+  /* demoted one step under the name: slightly smaller and darker than the
+     white hero line, but still clearly the logo (vw coefficient stays below
+     .name's 4.2vw so it can never outgrow the name at any width) */
+  font-size: clamp(11px, 3.4vw, 38px);
+  color: #bbb;
   letter-spacing: 6px;
+  /* em-based shadow stays under one font-pixel (0.125em) at any size —
+     replaces the old fixed 4px shadow + its ≤520px media patch */
   text-shadow:
-    4px 4px 0px #555,
-    0 0 40px rgba(255,255,255,0.15);
+    0.1em 0.1em 0 #444,
+    0 0 1em rgba(255, 255, 255, 0.1);
 }
 
 .subtitle {
@@ -56,11 +61,17 @@
 
 .name {
   font-family: 'Press Start 2P', monospace;
-  /* ~1.6x the original clamp(7px, 1.2vw, 11px) — reads clearly without
-     challenging the PORTFOLIO subtitle (20px max) above it */
-  font-size: clamp(12px, 2vw, 18px);
-  color: #888;
-  letter-spacing: 3px;
+  /* the HERO line — the treatment the POKEMON logo used to wear (white +
+     hard shadow + glow), width-safe for its 17 chars: ~92vw max at every
+     viewport (17·fs + 17·4px letter-spacing) */
+  font-size: clamp(13px, 4.2vw, 42px);
+  color: #fff;
+  letter-spacing: 4px;
+  white-space: nowrap;
+  /* em-based shadow stays under one font-pixel (0.125em) at any size */
+  text-shadow:
+    0.1em 0.1em 0 #555,
+    0 0 1em rgba(255, 255, 255, 0.15);
 }
 
 .copyright {
@@ -75,16 +86,4 @@
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
-}
-
-/* ═══════════════ MOBILE (≤ 520px) ═══════════════
-   media-scoped overrides only — desktop rules above stay untouched */
-@media (max-width: 520px) {
-  /* at the 28px clamp floor one font-pixel is 3.5px, so the desktop 4px hard
-     shadow detaches into a ghost copy of the title — keep it under a pixel */
-  .title {
-    text-shadow:
-      2px 2px 0 #555,
-      0 0 18px rgba(255, 255, 255, 0.12);
-  }
 }
