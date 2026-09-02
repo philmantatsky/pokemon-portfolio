@@ -19,8 +19,15 @@
      x=0 of the DS's 256px) — keep only a sliver of slate (user-tuned) */
   --padX: clamp(3px, 0.4vw, 7px);
   --padY: clamp(12px, 2vh, 22px);
-  /* shared by the slots (--u) and the striped backdrop math — keep in sync */
-  --slotH: clamp(104px, 22vh, 178px);
+  /* shared by the slots (--u) and the striped backdrop math — keep in sync.
+     Height guard (2026-09-01, user-reported "squished" non-maximized
+     windows): the centered party ignored the absolutely-positioned header,
+     so below ~870px viewport height the first row rode up under the chips
+     (11px under at 1512×790; a selected ring reached 22px in). The second
+     min() term shrinks panels in short windows so the header band survives;
+     at ≥ ~874px viewport the first term wins and nothing changes. */
+  --slotH: min(clamp(104px, 22vh, 178px), max(104px, calc((100vh - 340px) / 3)));
+  --slotH: min(clamp(104px, 22vh, 178px), max(104px, calc((100dvh - 340px) / 3)));
   --slotGap: clamp(8px, 1.4vh, 16px);
   --stagger: clamp(22px, 5.2vh, 56px);
   position: relative;
