@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react'
 import styles from './StarterSelection.module.css'
 
-const BASE = 'https://i0.wp.com/noellembrooks.com/wp-content/uploads/2025/02'
+// Bundled rather than hotlinked, so this screen has no third-party hosts to
+// fail on: the static fronts are PokeAPI's sprites/pokemon/{id}.png and the
+// idle GIFs are the 100px renditions from noellembrooks.com's 2025/02 uploads.
+import static1 from '../assets/starter-1.png'
+import static4 from '../assets/starter-4.png'
+import static7 from '../assets/starter-7.png'
+import idle1 from '../assets/starter-idle-1.gif'
+import idle4 from '../assets/starter-idle-4.gif'
+import idle7 from '../assets/starter-idle-7.gif'
 
 const STARTERS = [
   {
@@ -10,8 +18,8 @@ const STARTERS = [
     type: 'GRASS',
     bottomOffset: '-40px',
     hoverBottomOffset: '0px',
-    sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png',
-    hoverSprite: `${BASE}/Bulbasaur-idle-1.gif?w=100&ssl=1`,
+    sprite: static1,
+    hoverSprite: idle1,
   },
   {
     id: 4,
@@ -19,8 +27,8 @@ const STARTERS = [
     type: 'FIRE',
     bottomOffset: '-40px',
     hoverBottomOffset: '0px',
-    sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png',
-    hoverSprite: `${BASE}/Charmander-idle.gif?w=100&ssl=1`,
+    sprite: static4,
+    hoverSprite: idle4,
   },
   {
     id: 7,
@@ -28,8 +36,8 @@ const STARTERS = [
     type: 'WATER',
     bottomOffset: '-49px',
     hoverBottomOffset: '0px',
-    sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png',
-    hoverSprite: `${BASE}/squirtle-idle.gif?w=100&ssl=1`,
+    sprite: static7,
+    hoverSprite: idle7,
   },
 ]
 
