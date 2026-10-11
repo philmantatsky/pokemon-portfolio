@@ -1260,3 +1260,135 @@
     gap: 2px 0;
   }
 }
+
+/* ═══════════════ SHORT PHONES (≤ 520px wide, ≤ 640px tall) ═══════════════
+   The panel is 40% of the viewport and CANCEL keeps its desktop height, so
+   on a short phone (an iPhone SE once Safari's toolbars are counted) the
+   two move rows are left 36px each and their text spills onto the borders.
+   Take the slack out of CANCEL and the panel padding instead.
+   No button box-shadow here either — see the note on the phone block. */
+@media (max-width: 520px) and (max-height: 640px) {
+  .panelBody {
+    padding: 6px 10px 8px;
+    margin: 4px 8px 6px;
+  }
+  .moveWrap {
+    gap: 8px;
+  }
+  .moveInner {
+    padding: 4px 7px;
+    gap: 4px;
+  }
+  .cancelBtn {
+    padding: 4px;
+  }
+  .cancelBtn .subInner {
+    padding: 6px;
+  }
+}
+
+/* ═══════════════ SHORT WINDOWS (≤ 740px tall, wider than a phone) ═══════
+   The scene is 60% of the viewport HEIGHT, but sprites, HP boxes and button
+   text are sized from its WIDTH. In a short, wide window — a 1366×768
+   laptop leaves about 650px — they outgrow it: the move rows drop to 51px
+   for 38px of stacked text, the player's HP box climbs over Pikachu's legs,
+   and Red's cap reaches the top edge. Taller windows never match this block.
+   No button box-shadow here either — see the note on the phone block. */
+@media (max-height: 740px) and (min-width: 521px) {
+  /* enemy-side sprites are also capped by height. Red fills 86% of his frame
+     and stands on the feet line 49% down the scene, so 32vh (53% of the
+     scene) always leaves 3% of the scene above his cap. */
+  .scene {
+    --enemyW: min(clamp(150px, 18vw, 220px), 32vh);
+    --enemyShadowW: min(clamp(115px, 14vw, 175px), 25.5vh);
+  }
+  .enemySprite {
+    right: calc(22.5% - var(--enemyW) / 2);
+    bottom: calc(51% - 0.175 * var(--enemyW));
+    width: var(--enemyW);
+  }
+  .trainerEnemy {
+    right: calc(22.5% - var(--enemyW) / 2);
+    bottom: calc(51% - 0.0375 * var(--enemyW));
+    width: var(--enemyW);
+  }
+  .enemyShadow {
+    right: calc(22.5% - var(--enemyShadowW) / 2);
+    width: var(--enemyShadowW);
+  }
+
+  /* a one-line dialog needs 66px, not the 84px desktop floor */
+  .dialogBox {
+    padding: 12px 24px;
+    min-height: 66px;
+  }
+  /* the player's HP box is anchored a fixed distance above a ONE-line
+     dialog (below), so the longest line shown while that box is up must not
+     wrap: the outro, 54 characters at 1em each in this monospace font
+     (divided by 56 to leave air before the ▶), inside the dialog's 95vw
+     minus 56px of padding and border. The 12px floor gives up below ~765px
+     wide, where it wraps again. */
+  .dialogText {
+    font-size: min(
+      clamp(12px, 1.7vw, 18px),
+      max(12px, calc((95vw - 56px) / 56))
+    );
+  }
+
+  /* HP boxes: same content, less padding and one type size down */
+  .hpBox {
+    padding: 7px 14px;
+  }
+  .hpTopRow {
+    font-size: clamp(11px, 1.3vw, 13px);
+    margin-bottom: 6px;
+  }
+  .hpNumbers {
+    font-size: clamp(11px, 1.3vw, 13px);
+    margin-top: 5px;
+  }
+  /* 31% of a short scene puts the box on Pikachu. Sit just above the dialog
+     instead: 5% dialog offset + 66px dialog + 8px outer ring + 14px for the
+     EXP strip that hangs below this box. */
+  .playerHpBox {
+    bottom: calc(5% + 88px);
+  }
+
+  /* panel: give the move rows the height CANCEL and the padding were using */
+  .panelBody {
+    padding: 8px 14px 10px;
+    margin: 4px 10px 8px;
+  }
+  .moveWrap {
+    gap: 8px;
+  }
+  .moveGrid {
+    gap: 8px 12px;
+  }
+  .moveBtn {
+    padding: 4px;
+  }
+  .moveInner {
+    padding: 4px 14px;
+    gap: 4px;
+  }
+  .cancelBtn .subInner {
+    padding: 7px 6px;
+  }
+}
+
+/* …and where the buttons are wide enough, each move goes on ONE row (name
+   left, type and PP right) so the row height stops mattering. Below 900px a
+   long name, its badge and the PP no longer fit side by side. */
+@media (max-height: 740px) and (min-width: 900px) {
+  .moveInner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  .moveMeta {
+    flex-shrink: 0;
+    gap: 14px;
+  }
+}
