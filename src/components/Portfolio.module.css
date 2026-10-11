@@ -610,13 +610,19 @@
 
 /* ── Bottom bar: tan-framed dialog + floating CANCEL (reference bottom) ── */
 .bottomBar {
+  /* variables because the dialog's font-size math below needs the same
+     numbers the layout uses */
+  --barGap: clamp(24px, 3.4vw, 52px);
+  --barMarginX: clamp(10px, 1vw, 14px);
+  --cancelW: clamp(120px, 15vw, 200px);
+  --dlgPadX: clamp(14px, 1.8vw, 26px);
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: clamp(24px, 3.4vw, 52px);
+  gap: var(--barGap);
   /* room for the dialog's tan box-shadow frame — must cover the frame width
      on its own now that the screen padding is only a few px */
-  margin: clamp(8px, 1.2vh, 14px) clamp(10px, 1vw, 14px) clamp(4px, 0.8vh, 10px);
+  margin: clamp(8px, 1.2vh, 14px) var(--barMarginX) clamp(4px, 0.8vh, 10px);
 }
 
 .dialogBox {
@@ -626,13 +632,29 @@
   /* FIXED height for exactly two lines (em-based off the text size below) —
      the box must never grow with longer summaries, or the whole party grid
      shifts up when a project is opened (user-reported). Keep blurbs ≤ 2
-     lines; anything longer clips. */
-  font-size: clamp(24px, 3vw, 38px);
+     lines; anything longer clips.
+     The text scales with the box so a line always holds the same number of
+     characters: 30.5em, which is what the box holds at 38px in a 1512px-wide
+     window, the width the blurbs are written at. The long calc is the width
+     left for text (viewport minus side padding, bar margins, gap, CANCEL,
+     this box's padding and 8px of border). A blurb that fits two lines at
+     1512px therefore fits two lines in every narrower window. With a fixed
+     38px the box narrowed under the text and summaries lost their last
+     words below ~1440px. */
+  font-size: min(
+    38px,
+    calc(
+      (
+          100vw - 2 * var(--padX) - 2 * var(--barMarginX) - var(--barGap) -
+            var(--cancelW) - 2 * var(--dlgPadX) - 8px
+        ) / 30.5
+    )
+  );
   height: calc(2.6em + 16px);
   overflow: hidden;
   display: flex;
   align-items: center;
-  padding: 8px clamp(14px, 1.8vw, 26px);
+  padding: 8px var(--dlgPadX);
   background: #fff;
   /* DPPt message box: gray inner border, then a thick tan frame with a dark
      brown outline (box-shadow rings — it is a frame around the box, NOT a
@@ -650,9 +672,9 @@
   /* DPPt dialog text is dark gray with a pale drop shadow, not black */
   color: #4c4c54;
   text-shadow: 1px 1px 0 #c8c8cc;
-  /* tight line-to-line spacing like the game's two-line message boxes; at
-     narrow widths a summary may wrap to a 3rd line — cap the block at two
-     full lines so it clips whole-line, not half-line */
+  /* tight line-to-line spacing like the game's two-line message boxes. A
+     blurb too long for two lines would wrap to a third — cap the block at
+     two full lines so it clips whole-line, not half-line */
   line-height: 1.25;
   max-height: 2.5em;
   overflow: hidden;
@@ -661,7 +683,7 @@
 .cancelBtn {
   flex-shrink: 0;
   align-self: center;
-  width: clamp(120px, 15vw, 200px);
+  width: var(--cancelW);
   height: clamp(50px, 9.5vh, 84px);
   padding: 0;
   cursor: pointer;
