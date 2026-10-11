@@ -51,7 +51,7 @@ const PROJECTS = [
     url: 'https://github.com/philmantatsky/kalshi-vegas-arb',
   },
   {
-    name: 'POKEMON BATTLE AI',
+    name: 'POKEMON BATTLE AI (VGC)',
     sprite: icon9,
     lv: 50,
     hp: 236,

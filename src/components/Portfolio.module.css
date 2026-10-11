@@ -19,15 +19,35 @@
      x=0 of the DS's 256px) — keep only a sliver of slate (user-tuned) */
   --padX: clamp(3px, 0.4vw, 7px);
   --padY: clamp(12px, 2vh, 22px);
+  /* gap between the two party columns — a variable because the --slotH width
+     bound below needs the same number */
+  --colGap: clamp(10px, 1.6vw, 22px);
+  /* viewport height for the slot-size math; the @supports block right after
+     this rule upgrades it to dvh */
+  --vhFull: 100vh;
+  /* No slot panel is ever narrower than this many DS pixels (u), in any
+     tier, so the LONGEST project name fits unclipped. It is that name's need
+     plus 2u of slack: 44u name start + its glyph advance + 15u (right outline
+     column + the 14u gutter before the gender mark). Longest today:
+     "POKEMON BATTLE AI (VGC)" = 129u of glyphs, so 188u, so 190. Recompute
+     if a longer name is ever added (letters, digits and parens advance 6u,
+     a space 3u). */
+  --panelMinU: 190;
   /* shared by the slots (--u) and the striped backdrop math — keep in sync.
-     Height guard (2026-09-01, user-reported "squished" non-maximized
-     windows): the centered party ignored the absolutely-positioned header,
-     so below ~870px viewport height the first row rode up under the chips
-     (11px under at 1512×790; a selected ring reached 22px in). The second
-     min() term shrinks panels in short windows so the header band survives;
-     at ≥ ~874px viewport the first term wins and nothing changes. */
-  --slotH: min(clamp(104px, 22vh, 178px), max(104px, calc((100vh - 340px) / 3)));
-  --slotH: min(clamp(104px, 22vh, 178px), max(104px, calc((100dvh - 340px) / 3)));
+     Three bounds, the smallest wins:
+     1. the height clamp the layout was tuned at.
+     2. height guard: the centered party ignores the absolutely-positioned
+        header, so in a short window the first row would ride up under the
+        chips (11px under at 1512×790, a selected ring 22px in). This shrinks
+        panels there so the header band survives.
+     3. width guard: both columns stay at least --panelMinU wide. Without it
+        names clip in narrow windows — all six at 960px wide, which is half a
+        1080p monitor. */
+  --slotH: min(
+    clamp(104px, 22vh, 178px),
+    max(104px, calc((var(--vhFull) - 340px) / 3)),
+    calc((100vw - 2 * var(--padX) - var(--colGap)) * 45 / (2 * var(--panelMinU)))
+  );
   --slotGap: clamp(8px, 1.4vh, 16px);
   --stagger: clamp(22px, 5.2vh, 56px);
   position: relative;
@@ -44,6 +64,17 @@
   /* flat dark slate — the pinstripes live on the .party::before backdrop,
      NOT here; the reference backdrop around them is plain */
   background: #4b5266;
+}
+
+/* dvh (excludes iOS's retracting toolbar band) where the browser has it.
+   This has to be an @supports block, not a second "--vhFull: 100dvh" line in
+   the rule above: a custom property accepts any tokens, so a browser without
+   dvh does not drop that line — it wins the cascade, then fails at use and
+   collapses every slot to zero height. */
+@supports (height: 100dvh) {
+  .screen {
+    --vhFull: 100dvh;
+  }
 }
 
 /* ── Header: name pinned left, resume/social keys centered on the screen ── */
@@ -115,7 +146,7 @@
   flex: 1;
   min-height: 0;
   display: flex;
-  gap: clamp(10px, 1.6vw, 22px);
+  gap: var(--colGap);
   /* own stacking context: the negative-z striped backdrop paints above the
      screen backdrop but below every panel background */
   isolation: isolate;
@@ -664,19 +695,21 @@
 /* ═══════════════ MOBILE — PHONE TIER (≤ 520px) ═══════════════
    Media-scoped overrides ONLY — every desktop rule above stays untouched.
    The party reflows to ONE column of 6 slots, and --slotH (hence --u, hence
-   every sprite in the file) is re-derived from WIDTH: the desktop --slotH is
-   vh-only and maxes out on tall phones, which put desktop-scale 44u left
-   caps inside ~180px columns — names and HP bars resolved to zero width. */
+   every sprite in the file) is re-derived for it: the base --slotH sizes
+   panels for two columns of three, and one column of six needs its own
+   bounds. */
 @media (max-width: 520px) {
   .screen {
     --padY: 8px;
     --slotGap: 6px;
-    /* width bound: panel ≥ 175u so "LLM DEBATE SIMULATOR" (43u name start +
-       ~115u of glyphs + 14u right margin) fits. height bound: ~250px of
-       vertical chrome (padY + stacked header + 2 screen gaps + stacked
-       bottom bar) split across 6 slots. The dvh line wins where supported. */
-    --slotH: min(calc((100vw - 6px) * 45 / 175), calc((100vh - 262px) / 6 - 5px));
-    --slotH: min(calc((100vw - 6px) * 45 / 175), calc((100dvh - 262px) / 6 - 5px));
+    /* width bound: the single column's panel stays at least --panelMinU wide
+       so the longest name fits. height bound: ~262px of vertical chrome
+       (padY + stacked header + 2 screen gaps + stacked bottom bar) split
+       across 6 slots; --vhFull is dvh where supported. */
+    --slotH: min(
+      calc((100vw - 2 * var(--padX)) * 45 / var(--panelMinU)),
+      calc((var(--vhFull) - 262px) / 6 - 5px)
+    );
   }
 
   /* header joins the layout flow and stacks name-over-chips: the desktop
@@ -770,13 +803,11 @@
 }
 
 /* ═══════════════ MOBILE — TABLET TIER (521–900px) ═══════════════
-   Keep the desktop two-column party but cap --slotH by WIDTH so each ~50vw
-   column stays ≥ 175u and long names still fit (at 768px the desktop vh
-   clamp yields u≈3.96 inside 95u-wide columns). ≥ 901px is untouched. */
+   Keeps the desktop two-column party. The slot size needs no override here:
+   the base --slotH's width guard already keeps each ~50vw column at least
+   --panelMinU wide (this tier used to carry its own width cap, before the
+   base rule had one). Only the header chips and dialog type step down. */
 @media (min-width: 521px) and (max-width: 900px) {
-  .screen {
-    --slotH: min(clamp(104px, 22vh, 178px), calc((100vw - 20px) * 45 / 350));
-  }
   .headerLinks {
     gap: 12px;
   }
