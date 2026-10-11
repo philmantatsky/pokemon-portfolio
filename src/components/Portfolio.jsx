@@ -96,6 +96,10 @@ const PROJECTS = [
 function PText({ text, className }) {
   return (
     <span className={`${styles.ptext} ${className || ''}`} style={{ '--fw': PP_FONT.sheetW }}>
+      {/* the glyphs below are background images, so this is the only real
+          text: it names the slot buttons for screen readers and makes the
+          names findable and selectable as page text */}
+      <span className={styles.srOnly}>{text}</span>
       {[...text].map((ch, i) => {
         if (ch === ' ') return <span key={i} className={styles.psp} />
         const g = PP_FONT.map[ch] || PP_FONT.map['?']
@@ -356,6 +360,7 @@ export default function Portfolio({ onExit }) {
                 className={`${styles.slot} ${i === 0 ? styles.slotFirst : ''} ${
                   cursor === i ? styles.slotOn : ''
                 }`}
+                aria-label={p.name}
                 onMouseEnter={() => phase === 'browsing' && setCursor(i)}
                 onClick={() => pick(i)}
               >

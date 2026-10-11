@@ -356,6 +356,18 @@
   align-items: flex-start;
 }
 
+/* real text behind the bitmap glyphs (see PText): present for screen readers
+   and find-in-page, clipped to nothing on screen. Absolutely positioned so it
+   is not a flex item and cannot shift the glyphs. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .pch {
   flex: 0 0 auto;
   /* cells carry a 1px pad each side for the outline; the negative margins
