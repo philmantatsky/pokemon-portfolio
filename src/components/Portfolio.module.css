@@ -787,6 +787,11 @@
        the --slotH chrome budget (262px) and .actionMenu bottom track this */
     font-size: 16px;
     height: calc(5.1em + 16px);
+    /* the base rule's flex: 1 fills the bar's main axis, which is the WIDTH
+       on desktop but the HEIGHT in this stacked bar — there it overrides the
+       fixed height above, the box sizes to its text, and the party jumps
+       every time a project opens */
+    flex: none;
   }
   .dialogText {
     max-height: 5em;
@@ -800,10 +805,12 @@
     font-size: 20px;
   }
 
-  /* clear the taller stacked bottom bar (dialog 97.6px + gap + CANCEL) */
+  /* sit just above the stacked bottom bar. From the screen bottom: 8px screen
+     padding + 10px bar margin + 40px CANCEL + 8px gap + 97.6px dialog + its
+     10px tan frame = 173.6px, then this menu's own 12px outer ring. */
   .actionMenu {
     right: 12px;
-    bottom: 178px;
+    bottom: 190px;
   }
 
   .aboutBox {
