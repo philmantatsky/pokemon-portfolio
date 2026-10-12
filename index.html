@@ -4,6 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Phillip Mantatsky — Portfolio</title>
+    <!-- link preview (LinkedIn, iMessage, Slack, X): the title screen at
+         1200x630. There is no description on purpose. Crawlers need og:url
+         and og:image as absolute URLs, so both name the live domain and must
+         change with it. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://philmantatsky.vercel.app/" />
+    <meta property="og:title" content="Phillip Mantatsky — Portfolio" />
+    <meta property="og:image" content="https://philmantatsky.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Title screen reading Pokemon Portfolio, Press Start, Phillip Mantatsky" />
+    <meta name="twitter:card" content="summary_large_image" />
     <!-- the art is 18px, which fits no tab size evenly, so each small size is
          resampled from it separately rather than letting the browser scale one
          file; /favicon.ico holds the same four for anything that asks for it
