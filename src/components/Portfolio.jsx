@@ -36,7 +36,7 @@ const PROJECTS = [
     gender: 'm',
     summary:
       'Fine-tuned a vision model to identify any of 20,479 Pokemon cards from a live camera feed. TensorRT INT8 inference surfaces card pricing and population data.',
-    tech: 'Knows PYTHON, TENSORFLOW, NVIDIA TAO, TENSORRT, OPENCV, and DOCKER! In training since May 2026.',
+    tech: 'Knows PYTHON, PYTORCH, NVIDIA TAO, TENSORRT, OPENCV, and DOCKER! Trained May to August 2026.',
     url: 'https://github.com/philmantatsky/real-time-trading-card-recognizer',
   },
   {
